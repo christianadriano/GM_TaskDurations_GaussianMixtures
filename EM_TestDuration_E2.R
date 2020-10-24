@@ -16,4 +16,8 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
 df_E2_ground<- df_consent
 
-df_prior <- prior.df(faithful = df_consent$testDuration_minutes)
+df_prior <- prior.df(wait = df_consent$testDuration_minutes)
+df_prior
+
+main(wait.summary.df=df_prior)
+main(wait = df_prior)
