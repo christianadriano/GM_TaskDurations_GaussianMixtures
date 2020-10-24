@@ -7,9 +7,7 @@ https://tinyheero.github.io/2016/01/03/gmm-em.html
 
 "
 
-prior.df <- function(faithful){
-  
-  wait <- faithful$duration
+prior.df <- function(wait){
   
   wait.kmeans <- kmeans(wait, 2)
   wait.kmeans.cluster <- wait.kmeans$cluster
