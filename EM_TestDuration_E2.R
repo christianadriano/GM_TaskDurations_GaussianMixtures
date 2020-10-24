@@ -19,5 +19,4 @@ df_E2_ground<- df_consent
 df_prior <- prior.df(wait = df_consent$testDuration_minutes)
 df_prior
 
-main(wait.summary.df=df_prior)
-main(wait = df_prior)
+main(wait = df_consent$testDuration_minutes, wait.summary.df=df_prior)
