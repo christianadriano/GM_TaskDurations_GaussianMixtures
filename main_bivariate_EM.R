@@ -9,7 +9,7 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 
 
 
-main <- function(wait) {
+main <- function(wait,wait.summary.df) {
   
   for (i in 1:50) {
     if (i == 1) {
