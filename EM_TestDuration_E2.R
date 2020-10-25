@@ -75,10 +75,10 @@ compute_Memberships <- function(mstep,df){
   p_2_membership <- p_2_vector / (p_1_vector + p_2_vector)
   
   if(mu_1>mu_2){
-    df$testDuration_slow <- p_1_membership
+    #df$testDuration_slow <- p_1_membership
     df$testDuration_fast <- p_2_membership
   }else{
-    df$testDuration_slow <- p_2_membership
+    #df$testDuration_slow <- p_2_membership
     df$testDuration_fast <- p_1_membership
   }
   return(df)
@@ -179,14 +179,45 @@ df_consent %>%
 #Compute proportion by profession, because professions have distinct testDuration averages
 profession_list <- as.character(unique(df_consent$profession))
 
-for(prof in profession_list){
-  print(prof)
-  df_selected <- df_consent[df_consent$profession==prof,
-                            c("worker_id","testDuration_minutes")]
+df_consent$testDuration_fast <- NA
+#for(profes in profession_list){
+  profes <- profession_list[6]
+  print(profes)
+  df_selected <- df_consent[df_consent$profession==profes,
+                            c("worker_id","file_name","testDuration_minutes")]
   df_prior <- prior.df(wait = df_selected$testDuration_minutes)
   m.step <- main(wait = df_selected$testDuration_minutes, wait.summary.df=df_prior)
   df_selected <- compute_Memberships(m.step,df_selected) 
-  df_consent <- left_join(df_consent,df_selected,by=c("worker_id"),copy=FALSE)
+  df_consent <- as.data.frame(df_consent)
+  df_selected <- as.data.frame(df_selected)
+  summary(df_consent$testDuration_fast)
+  dim(df_selected)
+  df_consent$testDuration_fast[which(df_consent$worker_id %in% df_selected$worker_id
+                                     &
+                                       df_consent$file_name %in% df_selected$file_name 
+                                     & 
+                                        df_consent$profession==profes)] <- df_selected$testDuration_fast
+  summary(df_consent$testDuration_fast)
+  #df_consent <- left_join(df_consent,df_selected,by=c("worker_id"))
+  #clean-up for next round
+  #df_consent <- clean_up(df_consent)
+#}
+
+#Remove repeated columns from left_join
+clean_up <- function(df_consent){
+  
   df_consent <- rename(df_consent,
-         testDuration_minutes = testDuration_minutes.x)
+                       testDuration_minutes = testDuration_minutes.x)
+  if("testDuration_fast.x" %in% colnames(df_consent)){
+    df_consent <- rename(df_consent,
+                         testDuration_fast = testDuration_fast.x)
+  }
+  df_consent <- df_consent[,!(names(df_consent) %in% c("testDuration_minutes.y",
+                                                       "testDuration_fast.y"))]
+  return(df_consent)
 }
+
+df_consent$is_fast <- FALSE
+df_consent[df_consent$testDuration_fast>=0.5,]$is_fast <- TRUE
+summary(df_consent$testDuration_fast
+        )
