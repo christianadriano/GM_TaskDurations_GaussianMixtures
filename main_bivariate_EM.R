@@ -11,7 +11,7 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 
 main <- function(wait,wait.summary.df) {
   
-  for (i in 1:50) {
+  for (i in 1:100) {
     if (i == 1) {
       # Initialization
       e.step <- e_step(wait, wait.summary.df[["mu"]], wait.summary.df[["std"]],
@@ -27,6 +27,7 @@ main <- function(wait,wait.summary.df) {
       loglik.vector <- c(loglik.vector, e.step[["loglik"]])
       
       loglik.diff <- abs((cur.loglik - e.step[["loglik"]]))
+      #print(paste0(e.step[["loglik"]],",",cur.loglik,",",loglik.diff))
       if(loglik.diff < 1e-6) {
         break
       } else {
@@ -34,4 +35,5 @@ main <- function(wait,wait.summary.df) {
       }
     }
   }
+  return (m.step)
 }
