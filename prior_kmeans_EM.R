@@ -27,8 +27,12 @@ prior.df <- function(wait){
     group_by(cluster) %>%
     summarize(mu = mean(x), variance = var(x), std = sd(x), size = n())
   
+  #Initialize alpha
+  wait.summary.df <- wait.summary.df %>%
+    mutate(alpha = size / sum(size))
+  
   wait.summary.df %>%
-    select(cluster, mu, variance, std)
+    select(cluster, mu, variance, std, alpha)
   
   return(wait.summary.df)
   
