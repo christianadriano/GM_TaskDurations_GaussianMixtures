@@ -12,16 +12,6 @@ library(tidyverse)
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//main_bivariate_EM.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//prior_kmeans_EM.R")
 
-#Load data from demographics and qualification test Experiment-2
-source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
-
-#----------------------------------
-#Run for entire data set together
-df_prior <- prior.df(wait = df_consent$testDuration_minutes)
-m.step <- main(wait = df_consent$testDuration_minutes, wait.summary.df=df_prior)
-plot_mixture_models(wait = df_consent$testDuration_minutes,
-                    m.step=m.step)
-
 
 #------------------
 #Visualize results
@@ -37,9 +27,17 @@ plot_mix_comps <- function(x, mu, sigma, lam) {
 
 #' @param wait Input ata.
 #' @param m.step approximated mixture models produced by the EM algorithm
-plot_mixture_models <- function(wait){ 
+plot_mixture_models <- function(wait,m.step,title_prefix){ 
+
+    if(m.step$mu[1]>m.step$mu[2]){
+      color_1 <- "red"
+      color_2 <- "darkblue"
+    }else{
+      color_1 <- "darkblue"
+      color_2 <- "red"
+    }
   
-  data.frame(x = wait) %>%
+    plot <- data.frame(x = wait) %>%
     ggplot() +
     geom_histogram(aes(x, ..density..), binwidth = 0.5, colour = "black", 
                    fill = "lightblue") +
@@ -47,16 +45,18 @@ plot_mixture_models <- function(wait){
     stat_function(geom = "line", fun = plot_mix_comps,
                   args = list(m.step$mu[1], sqrt(m.step$var[1]), 
                               lam = m.step$alpha[1]),
-                  colour = "red", lwd = 1.0) +
+                  colour = color_1, lwd = 1.0) +
     stat_function(geom = "line", fun = plot_mix_comps,
                   args = list(m.step$mu[2], sqrt(m.step$var[2]), 
                               lam = m.step$alpha[2]),
-                  colour = "darkblue", lwd = 1.0) +
+                  colour = color_2, lwd = 1.0) +
     ylab("Density") +
     xlab("Test Duration (minutes), binwidth=0.5") +
-    ggtitle("Gaussian Mixture Model Fit - Test Duration (minutes)")
+    ggtitle(paste0(title_prefix,": Gaussian Mixture Model for Test Duration"))
 }
 
+
+    
 #---------------------------------------------------------------------
 #Compute cluster membership probability
 compute_Memberships <- function(mstep,df){
@@ -84,6 +84,18 @@ compute_Memberships <- function(mstep,df){
   return(df)
 }
 
+#---------------------------------------------------------
+#----------------------------------
+#Load data from demographics and qualification test Experiment-2
+source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+
+
+#Run for entire data set together
+df_consent$testDuration_fast <- NA
+df_prior <- prior.df(wait = df_consent$testDuration_minutes)
+m.step <- main(wait = df_consent$testDuration_minutes, wait.summary.df=df_prior)
+plot <- plot_mixture_models(df_consent$testDuration_minutes,m.step,"All")
+plot
 #---------------------------------------------------------
 #INVESTIGATE OUTCOMES
 cor.test(df_consent$z1,df_consent$testDuration_minutes,
@@ -159,6 +171,9 @@ df_consent %>%
   group_by(profession,is_fast) %>% 
   summarize(count = n())
 
+" The proportions changed with respect to when we computed for all population.
+The data is more balanced for all,except Professionals, who none fit in two Gaussians.
+"
 # MOST Subjects fall in the Fast Cluster
 # profession            is_fast count
 # <fct>                 <lgl>   <int>
@@ -176,6 +191,9 @@ df_consent %>%
 # 12 Other                 TRUE      101
 
 #----------------------------------------------------------------------
+
+source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+
 #Compute proportion by profession, because professions have distinct testDuration averages
 profession_list <- as.character(unique(df_consent$profession))
 
@@ -188,21 +206,179 @@ df_consent$testDuration_fast <- NA
   df_prior <- prior.df(wait = df_selected$testDuration_minutes)
   m.step <- main(wait = df_selected$testDuration_minutes, wait.summary.df=df_prior)
   df_selected <- compute_Memberships(m.step,df_selected) 
-  df_consent <- as.data.frame(df_consent)
-  df_selected <- as.data.frame(df_selected)
-  summary(df_consent$testDuration_fast)
-  dim(df_selected)
   df_consent$testDuration_fast[which(df_consent$worker_id %in% df_selected$worker_id
                                      &
                                        df_consent$file_name %in% df_selected$file_name 
                                      & 
                                         df_consent$profession==profes)] <- df_selected$testDuration_fast
-  summary(df_consent$testDuration_fast)
-  #df_consent <- left_join(df_consent,df_selected,by=c("worker_id"))
-  #clean-up for next round
-  #df_consent <- clean_up(df_consent)
-#}
+ 
+  #plot model for the profession
+  plot <- plot_mixture_models(df_selected$testDuration_minutes,m.step,profes)
+  plot
+ # }
 
+
+
+df_consent$is_fast <- FALSE
+df_consent[df_consent$testDuration_fast>=0.5,]$is_fast <- TRUE
+df_consent %>% 
+  group_by(profession,is_fast) %>% 
+  summarize(count = n())
+#   profession            is_fast count
+#   <fct>                 <lgl>   <int>
+# 1 Professional          TRUE      417
+# 2 Programmer            FALSE      13
+# 3 Programmer            TRUE       36
+# 4 Hobbyist              FALSE      44
+# 5 Hobbyist              TRUE      440
+# 6 Graduate_Student      FALSE      23
+# 7 Graduate_Student      TRUE      260
+# 8 Undergraduate_Student FALSE      59
+# 9 Undergraduate_Student TRUE      384
+# 10 Other                FALSE      11
+# 11 Other                TRUE      101
+
+#-----------------------------------------------------------
+#Evaluate how fast and slow can explain z1 score
+df_consent_fast <- df_consent[df_consent$is_fast,]
+df_consent_slow <- df_consent[!df_consent$is_fast,]
+
+#by profession
+prof_choice <- "Hobbyist"
+
+#Starting from teh most complex to the most simplest model
+
+model_1_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast+ testDuration_minutes*testDuration_fast, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_1_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast+ testDuration_minutes*testDuration_fast, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+summary(model_1_fast)
+summary(model_1_slow)
+
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+summary(model_2_fast)
+summary(model_2_slow)
+
+model_3_fast <- lm(formula = z1 ~ testDuration_minutes, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_3_slow <- lm(formula = z1 ~ testDuration_minutes, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+summary(model_3_fast)
+summary(model_3_slow)
+
+#model without segregation of fast slow
+model_4 <- lm(formula = z1 ~ testDuration_minutes, data=df_consent[df_consent$profession==prof_choice,] )
+summary(model_4)
+"
+Professional coefficients
+Model1 (fast): testDuration (+)*, fastMembership(-)
+Model2 (fast): testDuration (+)*, fastMembership(+), interaction(-)
+Model3 (fast): testDuration (+)*
+Model4 (all): testDuration (+)
+
+Programmer coefficients 
+Model1 (fast, slow): testDuration (+,+)*, fastMembership (+, +)*, interaction (+,+)*
+Model2 (fast, slow): testDuration (-,+), fastMembership (-, -)
+Model3 (fast, slow): testDuration (-,+)*
+Model4 (all): testDuration (zero)
+
+Graduates coefficients 
+Model1 (fast, slow): testDuration (+,+), fastMembership (+, -), interaction (-,-)  
+Model2 (fast, slow): testDuration (+,+), fastMembership (+, -)
+Model3 (fast, slow): testDuration (+,-)*
+Model4 (all): testDuration (+)*
+
+Hobbyist coefficients
+Model1 (fast, slow): testDuration (-,+), fastMembership (-, -), interaction (+,-) 
+Model2 (fast, slow): testDuration (+,+), fastMembership (+, -)
+Model3 (fast, slow): testDuration (+,+)*
+Model4 (all): testDuration (+)*
+
+Undergrad coefficients
+Model1 (fast, slow): testDuration (+,+), fastMembership (+, -)*, interaction (-,-) 
+Model2 (fast, slow): testDuration (+,-), fastMembership (+, +)
+Model3 (fast, slow): testDuration (+,-)*
+Model4 (all): testDuration (+)*
+
+  
+Other coefficients
+Model2 (fast, slow): testDuration (+,+), fastMembership (+, -), interaction (+,-)  
+Model3 (fast, slow): testDuration (+,-), fastMembership (+, +)
+Model3 (fast, slow): testDuration (+,-)*
+Model4 (all): testDuration (+)*
+
+
+Model 4 says that duration positively impacts score across all professions. However, this is not
+true when we look at individual groups discovered by the mixture models.
+Looking at Model 2 and Model 3, testDuration has a negative impact for slow group
+in the following professsions: Undergrad, Other, Grad. F
+Except for Programmer, duration has positive impact on score for the fast group across all other professions.
+Programmers have the reverse. The longer the slow group took better the score, whereas the fast group was the opposite.
+
+In conclusion, group membership within duration is a confounder for certain professions, but not others.
+
+
+
+" 
+#---------------
+#PLOTS to show this phenonmenon
+
+df_consent_fast <- df_consent[df_consent$is_fast,]
+df_consent_slow <- df_consent[!df_consent$is_fast,]
+df_consent_slow <- rbind(df_consent_slow, c(1:32))
+df_consent_slow[is.na(df_consent_slow$worker_id),]$profession <- "Professional"
+df_consent_slow[is.na(df_consent_slow$worker_id),]$testDuration_minutes <- 0.5
+df_consent_slow[is.na(df_consent_slow$worker_id),]$z1 <- 0
+df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
+
+
+ggplot(df_consent, aes(x=testDuration_minutes, y=z1)) + geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (z1)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("All: Duration impact on Score by Profession")
+
+
+ggplot(df_consent_fast, aes(x=testDuration_minutes, y=z1)) + geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
+theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (z1)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
+
+ggplot(df_consent_slow, aes(x=testDuration_minutes, y=z1)) + geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (z1)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Slow speed-cluster: Duration impact on Score by Profession")
+
+
+
+#----------------------------
+#OlD FUNCTIONS
 #Remove repeated columns from left_join
 clean_up <- function(df_consent){
   
@@ -216,8 +392,3 @@ clean_up <- function(df_consent){
                                                        "testDuration_fast.y"))]
   return(df_consent)
 }
-
-df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fast>=0.5,]$is_fast <- TRUE
-summary(df_consent$testDuration_fast
-        )
