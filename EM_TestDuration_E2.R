@@ -377,18 +377,3 @@ ggplot(df_consent_slow, aes(x=testDuration_minutes, y=z1)) + geom_point(aes(colo
 
 
 
-#----------------------------
-#OlD FUNCTIONS
-#Remove repeated columns from left_join
-clean_up <- function(df_consent){
-  
-  df_consent <- rename(df_consent,
-                       testDuration_minutes = testDuration_minutes.x)
-  if("testDuration_fast.x" %in% colnames(df_consent)){
-    df_consent <- rename(df_consent,
-                         testDuration_fast = testDuration_fast.x)
-  }
-  df_consent <- df_consent[,!(names(df_consent) %in% c("testDuration_minutes.y",
-                                                       "testDuration_fast.y"))]
-  return(df_consent)
-}
