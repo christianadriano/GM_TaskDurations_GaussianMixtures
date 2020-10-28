@@ -75,11 +75,11 @@ compute_Memberships <- function(mstep,df){
   p_2_membership <- p_2_vector / (p_1_vector + p_2_vector)
   
   if(mu_1>mu_2){
-    #df$testDuration_slow <- p_1_membership
-    df$testDuration_fast <- p_2_membership
+    df$testDuration_slowMembership <- p_1_membership
+    df$testDuration_fastMembership <- p_2_membership
   }else{
-    #df$testDuration_slow <- p_2_membership
-    df$testDuration_fast <- p_1_membership
+    df$testDuration_slowMembership <- p_2_membership
+    df$testDuration_fastMembership <- p_1_membership
   }
   return(df)
 }
@@ -91,9 +91,10 @@ source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding/
 
 
 #Run for entire data set together
-df_consent$testDuration_fast <- NA
+df_consent$testDuration_fastMembership <- NA
 df_prior <- prior.df(wait = df_consent$testDuration_minutes)
 m.step <- main(wait = df_consent$testDuration_minutes, wait.summary.df=df_prior)
+df_consent <- compute_Memberships(m.step, df_consent)
 plot <- plot_mixture_models(df_consent$testDuration_minutes,m.step,"All")
 plot
 #---------------------------------------------------------
@@ -103,40 +104,44 @@ cor.test(df_consent$z1,df_consent$testDuration_minutes,
          method="pearson")
 #Positive correlation = 0.2350389 
 
-cor.test(df_consent$z1,df_consent$testDuration_slow,
+cor.test(df_consent$z1,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
 #Negative correlation = -0.2183903  
 
-cor.test(df_consent$z1,df_consent$testDuration_fast,
+cor.test(df_consent$z1,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
 #Negative correlation = 0.2183903 
 
-slow <- df_consent$testDuration_slow
-fast <- df_consent$testDuration_fast
+#-----------------------------------------------------
+#REGRESSION MODELS
 
-model_1_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_minutes*testDuration_fast, data=df_consent )
-model_1_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_minutes*testDuration_slow, data=df_consent )
+model_1_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_minutes*testDuration_fastMembership, data=df_consent )
+model_1_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_minutes*testDuration_slowMembership, data=df_consent )
+summary(model_1_fast)
+summary(model_1_slow)
+
 "
 Does not matter if I use fast or slow in the regression
 P-values for the coefficients >0.05. Adjusted R-squared is small 0.06 
 "
-model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent )
-model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slow, data=df_consent )
-
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slowMembership, data=df_consent )
+summary(model_2_fast)
+summary(model_2_slow)
 "
 All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.06 
 Looking at the coefficients, we can see that not only the membership has a significant
 effect, but it also affects how the testDuration_minutes influences the score.
 
-Membership: Coefficients(testDuration_minutes, testDuration_fast)
+Membership: Coefficients(testDuration_minutes, testDuration_fastMembership)
 Fast: (0.034505,1.079562)
 Slow: (0.034505,-1.079562)
 "
 model_3 <- lm(formula = z1 ~ testDuration_minutes, data=df_consent )
-model_4 <- lm(formula = z1 ~ testDuration_fast, data=df_consent )
-model_5 <- lm(formula = z1 ~ testDuration_slow, data=df_consent )
+model_4 <- lm(formula = z1 ~ testDuration_fastMembership, data=df_consent )
+model_5 <- lm(formula = z1 ~ testDuration_slowMembership, data=df_consent )
 "
 Same for these last tow models, but the Adjusted R-squared is smaller 0.05
 "
@@ -147,23 +152,23 @@ slighlty improved the explainability of the z1 score"
 #--------------------------------------
 #Hard clustering
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fast>=0.5,]$is_fast <- TRUE
-View(df_consent[c("is_fast","testDuration_fast")])
+df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+View(df_consent[c("is_fast","testDuration_fastMembership")])
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_slow )
-model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slow, data=df_consent_slow )
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent_slow )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slowMembership, data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_fast )
-model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slow, data=df_consent_fast )
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent_fast )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slowMembership, data=df_consent_fast )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
-model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slow, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
 summary(model_2_fast)
 summary(model_2_slow)
 
@@ -191,36 +196,39 @@ The data is more balanced for all,except Professionals, who none fit in two Gaus
 # 12 Other                 TRUE      101
 
 #----------------------------------------------------------------------
+#----------------------------------------------------------------------
+#Now compute the membership by each profession, 
+#because professions have different mean values for testDuration.
 
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
 
 #Compute proportion by profession, because professions have distinct testDuration averages
 profession_list <- as.character(unique(df_consent$profession))
 
-df_consent$testDuration_fast <- NA
+df_consent$testDuration_fastMembership <- NA
 #for(profes in profession_list){
-  profes <- profession_list[6]
+  profes <- profession_list[1]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","testDuration_minutes")]
   df_prior <- prior.df(wait = df_selected$testDuration_minutes)
   m.step <- main(wait = df_selected$testDuration_minutes, wait.summary.df=df_prior)
   df_selected <- compute_Memberships(m.step,df_selected) 
-  df_consent$testDuration_fast[which(df_consent$worker_id %in% df_selected$worker_id
+  df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                      &
                                        df_consent$file_name %in% df_selected$file_name 
                                      & 
-                                        df_consent$profession==profes)] <- df_selected$testDuration_fast
+                                        df_consent$profession==profes)] <- df_selected$testDuration_fastMembership
  
   #plot model for the profession
   plot <- plot_mixture_models(df_selected$testDuration_minutes,m.step,profes)
   plot
  # }
 
-
+#Save df_consent to file so we can retrieve the tesDuration_fast
 
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fast>=0.5,]$is_fast <- TRUE
+df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
 df_consent %>% 
   group_by(profession,is_fast) %>% 
   summarize(count = n())
@@ -248,13 +256,13 @@ prof_choice <- "Hobbyist"
 
 #Starting from teh most complex to the most simplest model
 
-model_1_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast+ testDuration_minutes*testDuration_fast, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_1_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast+ testDuration_minutes*testDuration_fast, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_1_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_1_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
 summary(model_1_fast)
 summary(model_1_slow)
 
-model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fast, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_2_fast <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_2_slow <- lm(formula = z1 ~ testDuration_minutes + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
 summary(model_2_fast)
 summary(model_2_slow)
 
