@@ -207,7 +207,7 @@ profession_list <- as.character(unique(df_consent$profession))
 
 df_consent$testDuration_fastMembership <- NA
 #for(profes in profession_list){
-  profes <- profession_list[1]
+  profes <- profession_list[6]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","testDuration_minutes")]
@@ -225,10 +225,14 @@ df_consent$testDuration_fastMembership <- NA
   plot
  # }
 
-#Save df_consent to file so we can retrieve the tesDuration_fast
-
 df_consent$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+
+#Save df_consent to file so we can retrieve the tesDuration_fast
+path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
+write.csv(df_consent,paste0(path,"consent_with_testDuration_fastMembership.csv"));
+
+#Check the proportion across professions.
 df_consent %>% 
   group_by(profession,is_fast) %>% 
   summarize(count = n())
