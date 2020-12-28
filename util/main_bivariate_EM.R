@@ -4,8 +4,8 @@ Gaussian Mixture model for the test duration.
 "
 
 
-source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//e_step_ExpectationMaximization.R")
-source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//m_step_ExpectationMaximization.R")
+source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//e_step_ExpectationMaximization.R")
+source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//m_step_ExpectationMaximization.R")
 
 
 
