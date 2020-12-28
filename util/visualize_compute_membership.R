@@ -48,7 +48,6 @@ plot_mixture_models <- function(wait,m.step,title_prefix){
 }
 
 
-
 #---------------------------------------
 #Compute cluster membership probability
 compute_Memberships <- function(mstep,df){
