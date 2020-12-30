@@ -9,6 +9,9 @@ TODO:
 - Prepare to run EM for E1
 This will be my first generalization result across experiments E1 and E2!!!
 
+Concerns:
+While treating test, cannot treat the duration of passed and not passed the same.
+This affects how I should determine outliers.
 
 "
 
@@ -24,7 +27,12 @@ library(tidyverse)
 #Load data from demographics and qualification test Experiment-2
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//multiplot.R")
+dim(df_consent)
+summary(df_consent$test_duration)
+median_test_duration <- median(df_consent$test_duration)
 
+#replace outliers (tests 10 times longer than the median test duration)
+df_consent[df_consent$test_duration>=10*median_test_duration,]$test_duration <- median_test_duration
 
 #IS TEST DURATION BIMODAL?
 p1 <- ggplot(df_consent, aes(x=test_duration)) +
