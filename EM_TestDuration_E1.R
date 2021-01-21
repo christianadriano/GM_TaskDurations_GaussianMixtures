@@ -1,6 +1,12 @@
 "
 Gaussian Mixture Model for the test_duration in experiment E1
 
+Use the mixture model to categorize programmers into fast and slow groups w.r.t. test_duration
+
+
+Dependencies:
+- depends on categories of programmers as Students and Not Students
+
 
 "
 
@@ -11,6 +17,13 @@ Gaussian Mixture Model for the test_duration in experiment E1
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//main_bivariate_EM.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//prior_kmeans_EM.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//visualize_compute_membership.R")
+
+#---------------------------------------------------------
+#Load data from demographics and qualification test Experiment-1
+source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
+
+#----------------------------------
+
 
 
 #Run for entire data set together
