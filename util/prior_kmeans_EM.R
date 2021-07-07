@@ -32,7 +32,7 @@ prior.df <- function(wait){
     mutate(alpha = size / sum(size))
   
   wait.summary.df %>%
-    select(cluster, mu, variance, std, alpha)
+    dplyr::select(cluster, mu, variance, std, alpha)
   
   return(wait.summary.df)
   
