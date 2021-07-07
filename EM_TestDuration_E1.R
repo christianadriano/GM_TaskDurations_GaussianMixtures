@@ -35,17 +35,17 @@ plot <- plot_mixture_models(df_consent$test_duration,m.step,"All")
 plot
 #---------------------------------------------------------
 #INVESTIGATE OUTCOMES
-cor.test(df_consent$z1,df_consent$test_duration,
+cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
          method="pearson")
 #Positive correlation = 0.2350389 
 
-cor.test(df_consent$z1,df_consent$testDuration_slowMembership,
+cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
 #Negative correlation = -0.2183903  
 
-cor.test(df_consent$z1,df_consent$testDuration_fastMembership,
+cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
 #Negative correlation = 0.2183903 
@@ -53,8 +53,8 @@ cor.test(df_consent$z1,df_consent$testDuration_fastMembership,
 #-----------------------------------------------------
 #REGRESSION MODELS
 
-model_1_fast <- lm(formula = z1 ~ test_duration + test_duration*testDuration_fastMembership, data=df_consent )
-model_1_slow <- lm(formula = z1 ~ test_duration + test_duration*testDuration_slowMembership, data=df_consent )
+model_1_fast <- lm(formula = adjusted_score ~ test_duration + test_duration*testDuration_fastMembership, data=df_consent )
+model_1_slow <- lm(formula = adjusted_score ~ test_duration + test_duration*testDuration_slowMembership, data=df_consent )
 summary(model_1_fast)
 summary(model_1_slow)
 
@@ -62,8 +62,8 @@ summary(model_1_slow)
 Does not matter if I use fast or slow in the regression
 P-values for the coefficients >0.05. Adjusted R-squared is small 0.06 
 "
-model_2_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent )
-model_2_slow <- lm(formula = z1 ~ test_duration + testDuration_slowMembership, data=df_consent )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent )
 summary(model_2_fast)
 summary(model_2_slow)
 "
@@ -75,14 +75,14 @@ Membership: Coefficients(testDuration_minutes, testDuration_fastMembership)
 Fast: (0.034505,1.079562)
 Slow: (0.034505,-1.079562)
 "
-model_3 <- lm(formula = z1 ~ test_duration, data=df_consent )
-model_4 <- lm(formula = z1 ~ testDuration_fastMembership, data=df_consent )
-model_5 <- lm(formula = z1 ~ testDuration_slowMembership, data=df_consent )
+model_3 <- lm(formula = adjusted_score ~ test_duration, data=df_consent )
+model_4 <- lm(formula = adjusted_score ~ testDuration_fastMembership, data=df_consent )
+model_5 <- lm(formula = adjusted_score ~ testDuration_slowMembership, data=df_consent )
 "
 Same for these last tow models, but the Adjusted R-squared is smaller 0.05
 "
 "Hence, overall, it seems that the membership information 
-slighlty improved the explainability of the z1 score"
+slighlty improved the explainability of the adjusted_score score"
 
 
 #--------------------------------------
@@ -93,18 +93,18 @@ View(df_consent[c("is_fast","testDuration_fastMembership")])
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-model_2_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent_slow )
-model_2_slow <- lm(formula = z1 ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
-model_2_slow <- lm(formula = z1 ~ test_duration + testDuration_slowMembership, data=df_consent_fast )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
-model_2_slow <- lm(formula = z1 ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
 summary(model_2_fast)
 summary(model_2_slow)
 
@@ -187,7 +187,7 @@ df_consent %>%
 # 11 Other                TRUE      101
 
 #-----------------------------------------------------------
-#Evaluate how fast and slow can explain z1 score
+#Evaluate how fast and slow can explain adjusted_score score
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
@@ -196,23 +196,23 @@ prof_choice <- "Hobbyist"
 
 #Starting from teh most complex to the most simplest model
 
-model_1_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_1_slow <- lm(formula = z1 ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_1_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_1_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
 summary(model_1_fast)
 summary(model_1_slow)
 
-model_2_fast <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_2_slow <- lm(formula = z1 ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_3_fast <- lm(formula = z1 ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_3_slow <- lm(formula = z1 ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_3_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+model_3_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
 summary(model_3_fast)
 summary(model_3_slow)
 
 #model without segregation of fast slow
-model_4 <- lm(formula = z1 ~ test_duration, data=df_consent[df_consent$profession==prof_choice,] )
+model_4 <- lm(formula = adjusted_score ~ test_duration, data=df_consent[df_consent$profession==prof_choice,] )
 summary(model_4)
 "
 Professional coefficients
@@ -273,11 +273,11 @@ df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_slow <- rbind(df_consent_slow, c(1:32))
 df_consent_slow[is.na(df_consent_slow$worker_id),]$profession <- "Professional"
 df_consent_slow[is.na(df_consent_slow$worker_id),]$test_duration <- 0.5
-df_consent_slow[is.na(df_consent_slow$worker_id),]$z1 <- 0
+df_consent_slow[is.na(df_consent_slow$worker_id),]$adjusted_score <- 0
 df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
 
 
-ggplot(df_consent, aes(x=test_duration, y=z1)) + geom_point(aes(colour = profession))+
+ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
@@ -288,12 +288,12 @@ ggplot(df_consent, aes(x=test_duration, y=z1)) + geom_point(aes(colour = profess
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
-  ylab("Adjusted score (z1)") +
+  ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
   ggtitle("All: Duration impact on Score by Profession")
 
 
-ggplot(df_consent_fast, aes(x=test_duration, y=z1)) + geom_point(aes(colour = profession))+
+ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
 theme_minimal()+
   theme(
@@ -304,11 +304,11 @@ theme_minimal()+
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
-  ylab("Adjusted score (z1)") +
+  ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
   ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
 
-ggplot(df_consent_slow, aes(x=test_duration, y=z1)) + geom_point(aes(colour = profession))+
+ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
@@ -319,7 +319,7 @@ ggplot(df_consent_slow, aes(x=test_duration, y=z1)) + geom_point(aes(colour = pr
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
-  ylab("Adjusted score (z1)") +
+  ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
   ggtitle("Slow speed-cluster: Duration impact on Score by Profession")
 
