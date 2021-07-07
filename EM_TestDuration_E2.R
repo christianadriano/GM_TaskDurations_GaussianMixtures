@@ -18,6 +18,7 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 #----------------------------------
 #Load data from demographics and qualification test Experiment-2
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+df_consent <- load_consent_create_indexes();
 
 
 #Run for entire data set together
@@ -32,17 +33,17 @@ plot
 cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
          method="pearson")
-#Positive correlation = 0.2168067  
+#Positive correlation = 0.2346014  
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = -0.2684154  
+#Negative correlation = -0.2190735  
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = 0.2684154 
+#Negative correlation = 0.2190735 
 
 #-----------------------------------------------------
 #REGRESSION MODELS WITH ADJUSTED SCORE
@@ -56,7 +57,7 @@ summary(model_1_slow)
 REJECTED MODEL
 Does not matter if I use fast or slow in the regression
 Only testDuration_fast/slowMembership is significant (p-value<0.05)
-Adjusted R-squared is very small = 0.07 
+Adjusted R-squared is very small = 0.06
 "
 #-------------------------
 #Without Interactions
@@ -65,11 +66,11 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowM
 summary(model_2_fast)
 summary(model_2_slow)
 "
-All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.07 
+All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.06 
 Looking at the coefficients, we can see that not only the membership has a large effect.
 Membership: Coefficients(testDuration, testDuration_X_Membership)
-Fast: (0.006771,1.830880)
-Slow: (0.006771,-1.830880)
+Fast: (0.033991,1.089948)
+Slow: (0.033991,-1.089948)
 "
 model_3_all <- lm(formula = adjusted_score ~ test_duration, data=df_consent )
 model_4_fast <- lm(formula = adjusted_score ~ testDuration_fastMembership, data=df_consent )
@@ -79,11 +80,11 @@ summary(model_4_fast)
 summary(model_5_slow)
 
 "
-All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.07 
+All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.04 
 Model: Coefficients(testDuration OR testDuration_X_Membership)
-model_3_all: (0.023831)
-model_4_fast: (2.1732)
-model_5_slow: (-2.1732)
+model_3_all: (0.04997)
+model_4_fast: (2.08369)
+model_5_slow: (-2.08369)
 
 "
 "Hence, overall, it seems that the membership information 
@@ -97,19 +98,19 @@ model_1_all <- lm(formula = qualification_score ~ test_duration, data=df_consent
 model_1_fast <- lm(formula = qualification_score ~ test_duration + testDuration_fastMembership, data=df_consent )
 model_1_slow <- lm(formula = qualification_score ~ test_duration + testDuration_slowMembership, data=df_consent )
 summary(model_1_all)
-summary(model_1_slow)
+summary(model_1_fast)
 summary(model_1_slow)
 "
-All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.07 
+All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.06 
 Looking at the coefficients, we can see that not only the membership has a large effect.
 Membership: Coefficients(testDuration, testDuration_X_Membership)
-All: (0.055480)
-Fast: (0.013475,4.508231)
-Slow: (0.013475,-4.508231)
+All: (0.11843)
+Fast: (0.07582,2.90591)
+Slow: (0.07582,-2.90591)
 "
 
 "
-Adjusted_Score has 50% weaker coefficients than qualification_score for E2
+Adjusted_Score has 60% weaker coefficients than qualification_score for E2
 "
 
 #--------------------------------------
@@ -165,13 +166,14 @@ The data is more balanced for all,except Professionals, who none fit in two Gaus
 #because professions have different mean values for test_duration.
 
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+df_consent <- load_consent_create_indexes();
 
 #Compute proportion by profession, because professions have distinct testDuration averages
 profession_list <- as.character(unique(df_consent$profession))
 
 df_consent$testDuration_fastMembership <- NA
-#for(profes in profession_list){
-  profes <- profession_list[6]
+for(profes in profession_list){
+  #profes <- profession_list[6]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","test_duration")]
@@ -187,7 +189,7 @@ df_consent$testDuration_fastMembership <- NA
   #plot model for the profession
   plot <- plot_mixture_models(df_selected$test_duration,m.step,profes)
   plot
- # }
+ }
 
 df_consent$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
@@ -220,7 +222,7 @@ df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
 #by profession
-prof_choice <- "Hobbyist"
+prof_choice <- "Programmer"
 
 #Starting from teh most complex to the most simplest model
 
@@ -312,11 +314,11 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
     legend.position="top",
     legend.justification = "left",
     panel.spacing = unit(0.1, "lines"),
-    strip.text.x = element_text(size = 12),
-    plot.title = element_text(size=14),
-    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+    strip.text.x = element_text(size = 10),
+    plot.title = element_text(size=12),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=10)
   ) +
-  ylab("Adjusted score (adjusted_score)") +
+  ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
   ggtitle("All: Duration impact on Score by Profession")
 
@@ -328,11 +330,11 @@ theme_minimal()+
     legend.position="top",
     legend.justification = "left",
     panel.spacing = unit(0.1, "lines"),
-    strip.text.x = element_text(size = 12),
-    plot.title = element_text(size=14),
-    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+    strip.text.x = element_text(size = 10),
+    plot.title = element_text(size=12),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=10)
   ) +
-  ylab("Adjusted score (adjusted_score)") +
+  ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
   ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
 
@@ -343,11 +345,11 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes
     legend.position="top",
     legend.justification = "left",
     panel.spacing = unit(0.1, "lines"),
-    strip.text.x = element_text(size = 12),
-    plot.title = element_text(size=14),
-    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+    strip.text.x = element_text(size = 10),
+    plot.title = element_text(size=12),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=10)
   ) +
-  ylab("Adjusted score (adjusted_score)") +
+  ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
   ggtitle("Slow speed-cluster: Duration impact on Score by Profession")
 
