@@ -31,7 +31,29 @@ df_consent <- load_consent_create_indexes(load_is_student=1)
 #IS TEST DURATION BIMODAL?
 #YES, for all participants and also within the following groups:
 #Score<2
+
 #Score>=2 (qualified)
+
+ggplot(df_consent[df_consent$test_duration<=20 & df_consent$qualification_score<2,], aes(x=test_duration)) +
+  geom_histogram(binwidth = 0.5, colour = "black", 
+                 fill = "lightblue") +
+  
+ # geom_density(colour = "black", 
+#               fill = "lightblue")+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration All E1")
+
+
 p1 <- ggplot(df_consent, aes(x=test_duration)) +
   geom_histogram(binwidth = 0.5, colour = "black", 
                  fill = "lightblue") +
@@ -98,9 +120,11 @@ p4 <- ggplot(df_consent[df_consent$qualification_score<2,],
   ) +
   ylab("Probability Density") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Test Duration Qualified Participants (score<50%) E1")
+  ggtitle("Test Duration Non-Qualified Participants (score<50%) E1")
 
 multiplot(p1,p2,p3,p4,cols=2)
+
+#----
 
 
 p0 <- ggplot(df_consent[df_consent$qualification_score==0,], 
@@ -246,3 +270,17 @@ p1 <- ggplot(df_consent[df_consent$is_student==1,],
 multiplot(p0,p1,cols=1)
 
 
+#----------------------------
+# Plot on same chart
+
+df_consent$is_student <-  as.factor(df_consent$is_student)
+
+df_qualified <-  df_consent[!is.na(df_consent$is_student),]
+df_qualified$is_student <-  as.numeric(df_qualified$is_student)
+
+
+df_is_student <- data_frame(df_qualified[df_qualified$is_student==1,]$test_duration)
+df_not_student <- data_frame(df_qualified[df_qualified$is_student==0,]$test_duration)
+
+df_merged_E1 <- data.frame(cbind(df_is_student,df_not_student))
+hist(df_is_student)
