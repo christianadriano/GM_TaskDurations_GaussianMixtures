@@ -5,7 +5,7 @@ It is bimodal across all qualification score level, more strongly for Score=100%
 TODO:
 - Plot bimodality in histogram and density. Explain. Need to zoom in (remove outliers upper_wiskers)
 - Separate this in a different file
-- Discuss bimodality in E2 as well for different scores
+- Discuss bimodality in E1 as well for different scores
 - Prepare to run EM for E1
 This will be my first generalization result across experiments E1 and E2!!!
 
@@ -26,6 +26,7 @@ library(tidyverse)
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//multiplot.R")
 
+df_consent <- load_consent_create_indexes(load_is_student=1)
 
 #IS TEST DURATION BIMODAL?
 #YES, for all participants and also within the following groups:
@@ -199,3 +200,49 @@ p4 <- ggplot(df_consent[df_consent$qualification_score==4,],
   ggtitle("Test Duration for Score=4 E1")
 
 multiplot(p0,p1,p2,p3,p4,cols=2)
+
+
+#-----------------------
+#By Student and not
+
+p0 <- ggplot(df_consent[df_consent$is_student==0,], 
+             aes(x=test_duration)) +
+  #geom_density(colour = "black", 
+  #             fill = "lightblue") +
+  geom_histogram(binwidth = 0.5, colour = "black", 
+                 fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration of Non-Students E1")
+
+p1 <- ggplot(df_consent[df_consent$is_student==1,], 
+             aes(x=test_duration)) +
+  #geom_density(colour = "black", 
+  #             fill = "lightblue") +
+  geom_histogram(binwidth = 0.5, colour = "black", 
+                 fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration of Students E1")
+
+multiplot(p0,p1,cols=1)
+
+
