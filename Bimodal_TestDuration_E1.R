@@ -284,3 +284,6 @@ df_not_student <- data_frame(df_qualified[df_qualified$is_student==0,]$test_dura
 
 df_merged_E1 <- data.frame(cbind(df_is_student,df_not_student))
 hist(df_is_student)
+
+density.p <- ggdensity(df_consent, x = "test_duration", 
+                       fill = "is_student", palette = "jco")
