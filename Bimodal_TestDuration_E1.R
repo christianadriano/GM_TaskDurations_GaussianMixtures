@@ -272,13 +272,29 @@ multiplot(p0,p1,cols=1)
 
 #----------------------------
 # Plot on same chart
+# Nice tutorial here - http://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
 
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github("kassambara/ggpubr")
-install.packages("ggpubr")
+#if(!require(devtools)) install.packages("devtools")
+#devtools::install_github("kassambara/ggpubr")
+#install.packages("ggpubr")
 library(ggpubr)
 
 df_consent$is_student <-  as.factor(df_consent$is_student)
+df_consent <- df_consent[!is.na(df_consent$is_student),]
 
 density.p <- ggdensity(df_consent, x = "test_duration", 
                        fill = "is_student", palette = "jco")
+
+#-----------
+t.test(df_consent[df_consent$is_student==0,]$test_duration,
+       df_consent[df_consent$is_student==1,]$test_duration)
+# t = 5.6845, df = 607.02, p-value = 2.039e-08
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   0.6556541 1.3478138
+# sample estimates:
+#   mean of x mean of y 
+# 3.312319  2.310585 
+#is_student (is slower) and not-student (is faster) have statistically 
+#significant distinct average test_duration
+
