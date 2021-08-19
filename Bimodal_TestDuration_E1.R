@@ -269,6 +269,47 @@ p1 <- ggplot(df_consent[df_consent$is_student==1,],
 
 multiplot(p0,p1,cols=1)
 
+#------------------------------
+
+p0 <- ggplot(df_consent[df_consent$is_student==0,], 
+             aes(x=test_duration)) +
+  geom_density(colour = "black", 
+               fill = "lightblue") +
+  #geom_histogram(binwidth = 0.5, colour = "black", 
+  #               fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration of Non-Students E1")
+
+p1 <- ggplot(df_consent[df_consent$is_student==1,], 
+             aes(x=test_duration)) +
+  geom_density(colour = "black", 
+               fill = "lightblue") +
+  #geom_histogram(binwidth = 0.5, colour = "black", 
+  #               fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration of Students E1")
+
+multiplot(p0,p1,cols=1)
 
 #----------------------------
 # Plot on same chart
@@ -281,6 +322,9 @@ library(ggpubr)
 
 df_consent$is_student <-  as.factor(df_consent$is_student)
 df_consent <- df_consent[!is.na(df_consent$is_student),]
+
+density.p <- gdensity(df_consent$is_student==0,, x = "test_duration", 
+                       palette = "jco")
 
 density.p <- ggdensity(df_consent, x = "test_duration", 
                        fill = "is_student", palette = "jco")
