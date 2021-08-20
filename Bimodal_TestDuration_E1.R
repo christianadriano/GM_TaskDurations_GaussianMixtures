@@ -21,18 +21,58 @@ library(tidyverse)
 
 
 #---------------------------------------------------------
-#----------------------------------
 #Load data from demographics and qualification test Experiment-1
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//multiplot.R")
 
 df_consent <- load_consent_create_indexes(load_is_student=1)
 
-#IS TEST DURATION BIMODAL?
-#YES, for all participants and also within the following groups:
-#Score<2
+#-------------------------------------------
+# TEST DURATION ALL
 
-#Score>=2 (qualified)
+p0 <- ggplot(df_consent, aes(x=test_duration)) +
+  geom_histogram(binwidth = 0.5, colour = "black", 
+                 fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration All E1")
+
+p1 <- ggplot(df_consent, aes(x=test_duration)) +
+  geom_density(colour = "black", 
+               fill = "lightblue") +
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Probability Density") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Test Duration All E1")
+
+multiplot(p0,p1, cols=1)
+
+#The plot might be slightly bimodal, suggesting that there are two 
+#regimes of speed of answering the tests. Next I investigate 
+#if this bimodal distribution seems to be present in
+#the following subpopulations of the data: qualified vs not qualified,
+#scores=2, 3, 4; years_experience (by quartile, below vs above median)
+
+#----------------------------------------------------
+# TEST DURATION BY QUALIFIED AND NOT-QUALIFIED
+#Score>=2 (qualified
 
 ggplot(df_consent[df_consent$test_duration<=20 & df_consent$qualification_score<2,], aes(x=test_duration)) +
   geom_histogram(binwidth = 0.5, colour = "black", 
@@ -54,38 +94,6 @@ ggplot(df_consent[df_consent$test_duration<=20 & df_consent$qualification_score<
   ggtitle("Test Duration All E1")
 
 
-p1 <- ggplot(df_consent, aes(x=test_duration)) +
-  geom_histogram(binwidth = 0.5, colour = "black", 
-                 fill = "lightblue") +
-  theme_minimal()+
-  theme(
-    legend.position="top",
-    legend.justification = "left",
-    panel.spacing = unit(0.1, "lines"),
-    strip.text.x = element_text(size = 12),
-    plot.title = element_text(size=14),
-    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
-  ) +
-  ylab("Probability Density") +
-  xlab("Test Duration (minutes)") +
-  ggtitle("Test Duration All E1")
-
-p2 <- ggplot(df_consent, aes(x=test_duration)) +
-  geom_density(colour = "black", 
-               fill = "lightblue") +
-  theme_minimal()+
-  theme(
-    legend.position="top",
-    legend.justification = "left",
-    panel.spacing = unit(0.1, "lines"),
-    strip.text.x = element_text(size = 12),
-    plot.title = element_text(size=14),
-    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
-  ) +
-  ylab("Probability Density") +
-  xlab("Test Duration (minutes)") +
-  ggtitle("Test Duration All E1")
-
 #Only who qualified (qualification_score>=2)
 p3 <- ggplot(df_consent[df_consent$qualification_score>=2,], 
              aes(x=test_duration)) +
@@ -104,7 +112,7 @@ p3 <- ggplot(df_consent[df_consent$qualification_score>=2,],
   xlab("Test Duration (minutes)") +
   ggtitle("Test Duratio Qualified Participants (score>=50%) E1")
 
-#Only who DID NOT qualified (qualification_score>=2)
+#Only who DID NOT qualified (qualification_score<2)
 p4 <- ggplot(df_consent[df_consent$qualification_score<2,], 
              aes(x=test_duration)) +
   geom_density(colour = "black", 
@@ -124,8 +132,8 @@ p4 <- ggplot(df_consent[df_consent$qualification_score<2,],
 
 multiplot(p1,p2,p3,p4,cols=2)
 
-#----
-
+#-----------------------------------------
+#TEST DURATION BY SCORE LEVEL
 
 p0 <- ggplot(df_consent[df_consent$qualification_score==0,], 
              aes(x=test_duration)) +
@@ -226,8 +234,8 @@ p4 <- ggplot(df_consent[df_consent$qualification_score==4,],
 multiplot(p0,p1,p2,p3,p4,cols=2)
 
 
-#-----------------------
-#By Student and not
+#---------------------------------------------
+#HISTOGRAM PLOTS STUDENTS AND NON-STUDENTS
 
 p0 <- ggplot(df_consent[df_consent$is_student==0,], 
              aes(x=test_duration)) +
@@ -269,7 +277,8 @@ p1 <- ggplot(df_consent[df_consent$is_student==1,],
 
 multiplot(p0,p1,cols=1)
 
-#------------------------------
+#-------------------------------------------
+#DENSITY PLOTS STUDENTS AND NON-STUDENTS
 
 p0 <- ggplot(df_consent[df_consent$is_student==0,], 
              aes(x=test_duration)) +
