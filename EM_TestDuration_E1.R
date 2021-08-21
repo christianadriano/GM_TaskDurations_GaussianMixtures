@@ -21,11 +21,10 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 #---------------------------------------------------------
 #Load data from demographics and qualification test Experiment-1
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
+df_consent <- load_consent_create_indexes(load_is_student=1)
 
 #----------------------------------
-
-
-
+#ALL
 #Run for entire data set together
 df_consent$testDuration_fastMembership <- NA
 df_prior <- prior.df(wait = df_consent$test_duration)
@@ -38,17 +37,17 @@ plot
 cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
          method="pearson")
-#Positive correlation = 0.2350389 
+#Positive correlation = 0.1882553  
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = -0.2183903  
+#Negative correlation = -0.1033927   
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = 0.2183903 
+#Positive correlation = 0.1033927  
 
 #-----------------------------------------------------
 #REGRESSION MODELS
@@ -109,7 +108,7 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 df_consent %>% 
-  group_by(profession,is_fast) %>% 
+  group_by(is_student,is_fast) %>% 
   summarize(count = n())
 
 " The proportions changed with respect to when we computed for all population.
