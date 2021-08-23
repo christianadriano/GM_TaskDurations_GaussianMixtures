@@ -52,28 +52,38 @@ cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
 #-----------------------------------------------------
 #REGRESSION MODELS
 
-model_1_fast <- lm(formula = adjusted_score ~ test_duration + test_duration*testDuration_fastMembership, data=df_consent )
-model_1_slow <- lm(formula = adjusted_score ~ test_duration + test_duration*testDuration_slowMembership, data=df_consent )
+#Interaction Model duration*membership
+model_1_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership + test_duration*testDuration_fastMembership, data=df_consent )
+model_1_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership + test_duration*testDuration_slowMembership, data=df_consent )
 summary(model_1_fast)
 summary(model_1_slow)
-
 "
-Does not matter if I use fast or slow in the regression
-P-values for the coefficients >0.05. Adjusted R-squared is small 0.06 
+Results. Does not matter if I use fast or slow in the regression
+P-values for the coefficients >0.05. Adjusted R-squared is small 0.053
+slow: test_duration coef=0.51, slowMembership=0.94, interaction=-1.16
 "
+#------------------
+#No Interaction
 model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent )
 summary(model_2_fast)
 summary(model_2_slow)
 "
-All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.06 
-Looking at the coefficients, we can see that not only the membership has a significant
-effect, but it also affects how the testDuration_minutes influences the score.
+Only test_duration coefficient =0.06 an is significant (p-value<0.05),
+whereas slowMembership is not significant 
+Adjusted R-squared is smaller than in the interaction model 0.035 
 
 Membership: Coefficients(testDuration_minutes, testDuration_fastMembership)
-Fast: (0.034505,1.079562)
-Slow: (0.034505,-1.079562)
+Fast: (0.066407,0.076484)
+Slow: (0.066407,-0.076484)
+
+The size of the coefficients show that membership and test_duration only become relevant in 
+the interaction model. This happens because membership is not independent from
+test_duration.
 "
+
+#-----------------------------
+
 model_3 <- lm(formula = adjusted_score ~ test_duration, data=df_consent )
 model_4 <- lm(formula = adjusted_score ~ testDuration_fastMembership, data=df_consent )
 model_5 <- lm(formula = adjusted_score ~ testDuration_slowMembership, data=df_consent )
