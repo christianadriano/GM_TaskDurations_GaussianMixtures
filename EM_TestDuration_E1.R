@@ -110,6 +110,7 @@ df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
 View(df_consent[c("is_fast","testDuration_fastMembership")])
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
+df_consent_fast <- df_consent[df_consent$is_fast,]
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
@@ -121,10 +122,17 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowM
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==1,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$is_student==1,] )
 summary(model_2_fast)
 summary(model_2_slow)
+
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==0,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$is_student==0,] )
+summary(model_2_fast)
+summary(model_2_slow)
+
+
 
 df_consent %>% 
   group_by(is_student,is_fast) %>% 
@@ -133,22 +141,32 @@ df_consent %>%
 " The proportions changed with respect to when we computed for all population.
 The data is more balanced for all,except Professionals, who none fit in two Gaussians.
 "
-# MOST Subjects fall in the Fast Cluster
-# profession            is_fast count
-# <fct>                 <lgl>   <int>
-# 1 Professional          FALSE      65
-# 2 Professional          TRUE      352
-# 3 Programmer            FALSE       1
-# 4 Programmer            TRUE       48
-# 5 Hobbyist              FALSE      64
-# 6 Hobbyist              TRUE      420
-# 7 Graduate_Student      FALSE      59
-# 8 Graduate_Student      TRUE      224
-# 9 Undergraduate_Student FALSE      79
-# 10 Undergraduate_Student TRUE      364
-# 11 Other                 FALSE      11
-# 12 Other                 TRUE      101
+# 61% of Subjects fall in the Fast Cluster 1112, 
+#while 715 are slow
+#Looking at the subjects who did not provide demographic information,
+#57% (1844) are Fast and 42% (1369) are slow.
+#Among students and non-students the proportion is similar.
+#Non-Students:  Fast 61%, Slow 39%
+#Students: Fast 60%, Slow 40%
 
+"
+This homogeneous proportions across groups is very surprising, 
+because Fast and Slow only considered test_duration,
+whereas student and non-student only considered age and years_experience
+"
+#DATA
+#   is_student is_fast count
+#         <int> <lgl>   <int>  <%*>
+# 1          0  FALSE     618   39%
+# 2          0  TRUE      968   61%
+# Subtotal               1586  100%                       
+# 3          1  FALSE      97   40%
+# 4          1  TRUE      144   60%
+# Subtotal                241  100% 
+# 5         NA  FALSE    1369   43%
+# 6         NA  TRUE     1844   57%
+# Subtotal               3213  100%
+#*rounded
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 #Now compute the membership by each profession, 
