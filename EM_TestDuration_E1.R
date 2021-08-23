@@ -77,22 +77,31 @@ Membership: Coefficients(testDuration_minutes, testDuration_fastMembership)
 Fast: (0.066407,0.076484)
 Slow: (0.066407,-0.076484)
 
-The size of the coefficients show that membership and test_duration only become relevant in 
-the interaction model. This happens because membership is not independent from
-test_duration.
+The size of the coefficients show that membership and test_duration 
+only become relevant in the interaction model. 
+This hints that membership has more information about score than the duration
+alone.
 "
 
 #-----------------------------
+# Separate features
 
 model_3 <- lm(formula = adjusted_score ~ test_duration, data=df_consent )
 model_4 <- lm(formula = adjusted_score ~ testDuration_fastMembership, data=df_consent )
 model_5 <- lm(formula = adjusted_score ~ testDuration_slowMembership, data=df_consent )
-"
-Same for these last tow models, but the Adjusted R-squared is smaller 0.05
-"
-"Hence, overall, it seems that the membership information 
-slighlty improved the explainability of the adjusted_score score"
+summary(model_3)
+summary(model_4)
+summary(model_5)
 
+# Coefficient (value,p-value)
+# test_duration (0.067871,<0.05)
+# fast_membership (-1.01054,<0.05)
+# slow_membership (1.01054,<0.05)
+
+"
+This demonstrates that membership carries more information about the score
+than the test_duration.
+"
 
 #--------------------------------------
 #Hard clustering
