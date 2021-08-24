@@ -227,8 +227,8 @@ df_consent %>%
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-#by profession
-prof_choice <- "Hobbyist"
+#by student or non-student
+choice <- 1 #student=1, non_student=0
 
 #Starting from teh most complex to the most simplest model
 
@@ -237,13 +237,13 @@ model_1_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastM
 summary(model_1_fast)
 summary(model_1_slow)
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==choice,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$is_student==choice,] )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_3_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_3_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+model_3_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==choice,] )
+model_3_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==choice,] )
 summary(model_3_fast)
 summary(model_3_slow)
 
