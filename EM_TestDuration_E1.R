@@ -117,25 +117,38 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_sl
 summary(model_2_fast)
 summary(model_2_slow)
 
-coefficient test_duration 
-(fast,slow)
-(0.07035, -0.27952) 
+#(filter,fast,slow)
+#(all-aggregated, 0.07035, -0.27952) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
 " 
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
-summary(model_2_fast)
-summary(model_2_slow)
-
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==0,] )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==0,] )
 summary(model_2_fast)
 summary(model_2_slow)
+#(filter,fast,slow)
+#(non-students,0.074119,-0.20392)
+
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
+summary(model_2_fast)
+summary(model_2_slow)
+#(filter,fast,slow)
+#(students,0.27250,-0.6462)
 
 
+"
+Fast people the longer they spend, higher score
+Slow people, the longer they spend, lower their score.
+However, when only looking at students, these coefficients were stronger.
+
+" 
+
+#------------------------------------------------------------
+#However, since I am looking at groups, I should redo the 
+#fast/slow classification by group.
 
 df_consent %>% 
   group_by(is_student,is_fast) %>% 
