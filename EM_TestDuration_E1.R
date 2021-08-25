@@ -112,23 +112,26 @@ View(df_consent[c("is_fast","testDuration_fastMembership")])
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast )
+coefficient test_duration 
+(fast,slow)
+(0.07035, -0.27952) 
+"
+Fast people the longer they spend, higher score
+Slow people, the longer they spend, lower their score.
+" 
+
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==1,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$is_student==1,] )
-summary(model_2_fast)
-summary(model_2_slow)
-
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==0,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$is_student==0,] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==0,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==0,] )
 summary(model_2_fast)
 summary(model_2_slow)
 
