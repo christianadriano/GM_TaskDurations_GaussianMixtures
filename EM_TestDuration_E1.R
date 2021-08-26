@@ -185,40 +185,57 @@ whereas student and non-student only considered age and years_experience
 #*rounded
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#Now compute the membership by each profession, 
-#because professions have different mean values for testDuration.
+#Now compute the membership by each student and non-student, 
+#because students and non-students have different mean values for test_duration.
 
-source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+#Load data from demographics and qualification test Experiment-1
+source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
+df_consent <- load_consent_create_indexes(load_is_student=1)
 
-#Compute proportion by profession, because professions have distinct testDuration averages
-profession_list <- as.character(unique(df_consent$profession))
+#remove rows without is_student label
+df_consent <- df_consent[complete.cases(df_consent$is_student),];
+df_consent$testDuration_fastMembership <- NA;
 
-df_consent$testDuration_fastMembership <- NA
-#for(profes in profession_list){
-  profes <- profession_list[6]
-  print(profes)
-  df_selected <- df_consent[df_consent$profession==profes,
-                            c("worker_id","file_name","test_duration")]
-  df_prior <- prior.df(wait = df_selected$test_duration)
-  m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
-  df_selected <- compute_Memberships(m.step,df_selected) 
-  df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
-                                     &
-                                       df_consent$file_name %in% df_selected$file_name 
+#STUDENTS 
+choice <- 1;
+df_selected <- df_consent[df_consent$is_student==choice,]
+#df_selected <- df_selected[complete.cases(df_selected$is_student),]
+#build the EM model
+df_prior <- prior.df(wait = df_selected$test_duration)
+m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
+df_selected <- compute_Memberships(m.step,df_selected) 
+df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                      & 
-                                        df_consent$profession==profes)] <- df_selected$testDuration_fastMembership
+                                        df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
  
-  #plot model for the profession
-  plot <- plot_mixture_models(df_selected$test_duration,m.step,profes)
-  plot
- # }
+#plot model for the profession
+plot <- plot_mixture_models(df_selected$test_duration,m.step,"Students E1")
+plot
 
+#-------------
+#NON-STUDENTS
+choice <- 0;
+
+df_selected <- df_consent[df_consent$is_student==choice,]
+
+df_prior <- prior.df(wait = df_selected$test_duration)
+m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
+df_selected <- compute_Memberships(m.step,df_selected) 
+df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
+                                             & 
+                                            df_consent$is_student==choice)] <- df_selected$testDuration_fastMembership
+
+#plot model for the profession
+plot <- plot_mixture_models(df_selected$test_duration,m.step,"Non-Students E1")
+plot
+
+#---------------
 df_consent$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
 path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
-write.csv(df_consent,paste0(path,"consent_with_testDuration_fastMembership.csv"));
+write.csv(df_consent,paste0(path,"E1_consent_with_testDuration_fastMembership.csv"));
 
 #Check the proportion across professions.
 df_consent %>% 
