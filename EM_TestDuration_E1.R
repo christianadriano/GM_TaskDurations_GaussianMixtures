@@ -239,21 +239,17 @@ write.csv(df_consent,paste0(path,"E1_consent_with_testDuration_fastMembership.cs
 
 #Check the proportion across professions.
 df_consent %>% 
-  group_by(profession,is_fast) %>% 
+  group_by(is_student,is_fast) %>% 
   summarize(count = n())
-#   profession            is_fast count
-#   <fct>                 <lgl>   <int>
-# 1 Professional          TRUE      417
-# 2 Programmer            FALSE      13
-# 3 Programmer            TRUE       36
-# 4 Hobbyist              FALSE      44
-# 5 Hobbyist              TRUE      440
-# 6 Graduate_Student      FALSE      23
-# 7 Graduate_Student      TRUE      260
-# 8 Undergraduate_Student FALSE      59
-# 9 Undergraduate_Student TRUE      384
-# 10 Other                FALSE      11
-# 11 Other                TRUE      101
+#       is_student is_fast   count  proportion
+#           <int>   <lgl>   <int>   %
+# 1          0      FALSE     628   40%
+# 2          0      TRUE      958   60%
+#                   Sutotal   1586
+# 3          1      FALSE      63   26%
+# 4          1      TRUE      178   74%
+#                   Sutotal   241
+
 
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
