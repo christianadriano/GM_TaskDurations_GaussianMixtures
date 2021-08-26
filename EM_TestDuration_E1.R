@@ -107,7 +107,6 @@ than the test_duration.
 #Hard clustering
 df_consent$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
-View(df_consent[c("is_fast","testDuration_fastMembership")])
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
@@ -245,90 +244,53 @@ df_consent %>%
 #           <int>   <lgl>   <int>   %
 # 1          0      FALSE     628   40%
 # 2          0      TRUE      958   60%
-#                   Sutotal   1586
+#                   Sutotal  1586  100%
 # 3          1      FALSE      63   26%
 # 4          1      TRUE      178   74%
-#                   Sutotal   241
+#                   Sutotal   241  100%
 
+"Compared with the clusters computed over all participants, 
+the proportion of is_fast for non_student changed radically.
+This shows the importance of computing this clustering by group. "
 
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-#by student or non-student
-choice <- 1 #student=1, non_student=0
-
-#Starting from teh most complex to the most simplest model
-
-model_1_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_1_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ testDuration_minutes*testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
-summary(model_1_fast)
-summary(model_1_slow)
-
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$is_student==choice,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$is_student==choice,] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
-model_3_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==choice,] )
-model_3_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==choice,] )
-summary(model_3_fast)
-summary(model_3_slow)
-
-#model without segregation of fast slow
-model_4 <- lm(formula = adjusted_score ~ test_duration, data=df_consent[df_consent$profession==prof_choice,] )
-summary(model_4)
+#(filter,fast,slow)
+#(all-aggregated, 0.080440, -0.22327) 
 "
-Professional coefficients
-Model1 (fast): test_duration (+)*, fastMembership(-)
-Model2 (fast): test_duration (+)*, fastMembership(+), interaction(-)
-Model3 (fast): test_duration (+)*
-Model4 (all): test_duration (+)
+Fast people the longer they spend, higher score
+Slow people, the longer they spend, lower their score.
+" 
 
-Programmer coefficients 
-Model1 (fast, slow): test_duration (+,+)*, fastMembership (+, +)*, interaction (+,+)*
-Model2 (fast, slow): test_duration (-,+), fastMembership (-, -)
-Model3 (fast, slow): test_duration (-,+)*
-Model4 (all): test_duration (zero)
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==0,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==0,] )
+summary(model_2_fast)
+summary(model_2_slow)
+#(filter,fast,slow)
+#(non-students,0.071942,-0.2940)
 
-Graduates coefficients 
-Model1 (fast, slow): test_duration (+,+), fastMembership (+, -), interaction (-,-)  
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
+summary(model_2_fast)
+summary(model_2_slow)
+#(filter,fast,slow)
+#(students,0.2874,2.1211) 
 
-Hobbyist coefficients
-Model1 (fast, slow): test_duration (-,+), fastMembership (-, -), interaction (+,-) 
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -)
-Model3 (fast, slow): test_duration (+,+)*
-Model4 (all): test_duration (+)*
-
-Undergrad coefficients
-Model1 (fast, slow): test_duration (+,+), fastMembership (+, -)*, interaction (-,-) 
-Model2 (fast, slow): test_duration (+,-), fastMembership (+, +)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
-
-  
-Other coefficients
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -), interaction (+,-)  
-Model3 (fast, slow): test_duration (+,-), fastMembership (+, +)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
-
-
-Model 4 says that duration positively impacts score across all professions. However, this is not
-true when we look at individual groups discovered by the mixture models.
-Looking at Model 2 and Model 3, testDuration has a negative impact for slow group
-in the following professsions: Undergrad, Other, Grad. F
-Except for Programmer, duration has positive impact on score for the fast group across all other professions.
-Programmers have the reverse. The longer the slow group took better the score, whereas the fast group was the opposite.
-
-In conclusion, group membership within duration is a confounder for certain professions, but not others.
-
-
-
+"
+Students have a different behavior. 
+Fast students the longer they spend, higher score
+Slow students, the longer they spend, much higher their score.
+" 
+"In conclusion, group membership within duration is a confounder for certain professions, 
+but not others.
 " 
 #---------------
 #PLOTS to show this phenonmenon
