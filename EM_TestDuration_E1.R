@@ -307,7 +307,8 @@ df_consent_slow[is.na(df_consent_slow$worker_id),]$adjusted_score <- 0
 df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
 
 
-ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = is_student))+
+ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
   theme_minimal()+
   theme(
@@ -323,7 +324,8 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
   ggtitle("All: Duration impact on Score by Is_Student")
 
 
-ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = is_student))+
+ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
 theme_minimal()+
   theme(
@@ -338,7 +340,8 @@ theme_minimal()+
   xlab("Test Duration (minutes)") +
   ggtitle("Fast speed-cluster: Duration impact on Score by Is_student")
 
-ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = is_student))+
+ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
   theme_minimal()+
   theme(
@@ -393,4 +396,26 @@ However, their average scores are not statistically significant distinct!
 So, slow non-students are probably as bad as the slow students.
 "
 
-#What if I cut-off at 1 minute?
+#-------------------------------
+#What if I cut-off at the max range of students?
+#Does the difference in correlation persist?
+#Bingo! The relationship reverses. Now, both are positive, 
+#the longer they spend, higher the accuracy.
+
+df_cut <- df_consent_slow[df_consent_slow$test_duration<=0.75,]
+
+ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = is_student))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (adjusted_score)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Slow speed-cluster: Duration impact on Score by Is_Student")
