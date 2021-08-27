@@ -295,10 +295,13 @@ but not others.
 #---------------
 #PLOTS to show this phenomenon
 
+df_consent$is_student <- as.factor(df_consent$is_student)
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
-df_consent_slow <- rbind(df_consent_slow, c(1:32))
-df_consent_slow[is.na(df_consent_slow$worker_id),]$is_student <- 1
+df_consent_slow <- rbind(df_consent_slow, c(1:100))
+
+#Filling NAs
+df_consent_slow[is.na(df_consent_slow$worker_id),]$is_student <- "1"
 df_consent_slow[is.na(df_consent_slow$worker_id),]$test_duration <- 0.5
 df_consent_slow[is.na(df_consent_slow$worker_id),]$adjusted_score <- 0
 df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
@@ -333,10 +336,10 @@ theme_minimal()+
   ) +
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
+  ggtitle("Fast speed-cluster: Duration impact on Score by Is_student")
 
-ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
+ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = is_student))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
