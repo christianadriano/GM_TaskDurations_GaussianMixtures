@@ -353,5 +353,44 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes
   xlab("Test Duration (minutes)") +
   ggtitle("Slow speed-cluster: Duration impact on Score by Is_Student")
 
+#---------------------------
+students <- df_consent[df_consent$is_student=="1",]$adjusted_score
+non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
+t.test(students,non_students)
 
+# Welch Two Sample t-test
+# 
+# data:  students and non_students
+# t = -2.1623, df = 324.46, p-value = 0.03133
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -0.31786057 -0.01500566
+# sample estimates:
+#   mean of x mean of y 
+# 2.527016  2.693449 
 
+"
+Eventhoug non-students have statistically significan higher average score, the
+slow group, the longer they spend, worse their score becomes.
+"
+#-----------------------------
+# Checking only the slow group
+students <- df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score
+non_students <- df_consent_slow[df_consent_slow$is_student=="0",]$adjusted_score
+t.test(students,non_students)
+# Welch Two Sample t-test
+# 
+# data:  students and non_students
+# t = -0.53882, df = 77.269, p-value = 0.5916
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   -0.3446355  0.1978381
+# sample estimates:
+#   mean of x mean of y 
+# 2.391962  2.465360 
+"
+However, their average scores are not statistically significant distinct!
+So, slow non-students are probably as bad as the slow students.
+"
+
+#What if I cut-off at 1 minute?
