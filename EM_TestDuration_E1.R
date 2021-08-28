@@ -196,8 +196,18 @@ df_consent <- df_consent[complete.cases(df_consent$is_student),];
 df_consent$testDuration_fastMembership <- NA;
 
 #STUDENTS 
+#Remove outlier at 15 min
+row_to_keep = which(df_consent[df_consent$is_student==1 & df_consent$test_duration<14,])
+df_consent <- df_consent[row_to_keep,]
+summary(df_consent[df_consent$is_student==1,]$test_duration)
+dim(df_consent)
+plot(df_consent[df_consent$is_student==1,]$test_duration)
+
 choice <- 1;
 df_selected <- df_consent[df_consent$is_student==choice,]
+row_to_keep = which(df_selected$test_duration>14)
+summary(df_selected$test_duration)
+barplot(df_selected$test_duration)
 #df_selected <- df_selected[complete.cases(df_selected$is_student),]
 #build the EM model
 df_prior <- prior.df(wait = df_selected$test_duration)
@@ -208,7 +218,7 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
                                         df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
  
 #plot model for the profession
-plot <- plot_mixture_models(df_selected$test_duration,m.step,"Students E1")
+plot <- plot_mixture_models(df_consent[df_consent$is_student==1,]$test_duration,m.step,"Students E1")
 plot
 
 #-------------
@@ -222,10 +232,10 @@ m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
 df_selected <- compute_Memberships(m.step,df_selected) 
 df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                              & 
-                                            df_consent$is_student==choice)] <- df_selected$testDuration_fastMembership
+                                               df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
 
 #plot model for the profession
-plot <- plot_mixture_models(df_selected$test_duration,m.step,"Non-Students E1")
+plot <- plot_mixture_models(df_consent[df_consent$is_student==0,]$test_duration,m.step,"Non-Students E1")
 plot
 
 #---------------
@@ -336,9 +346,10 @@ theme_minimal()+
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
+  ylim(min(df_consent_fast$adjusted_score),max(df_consent_fast$adjusted_score)+1)+
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Fast speed-cluster: Test Duration x Test Score by Student Status")
+  ggtitle("Fast: Test Duration x Test Score by Student Status")
 
 ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
@@ -352,9 +363,10 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
+  ylim(min(df_consent_slow$adjusted_score),max(df_consent_slow$adjusted_score)+1)+
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Slow speed-cluster: Duration impact on Score by Is_Student")
+  ggtitle("Slow: Test Duration X Test Score by Student Status")
 
 #---------------------------
 students <- df_consent[df_consent$is_student=="1",]$adjusted_score
@@ -418,4 +430,4 @@ ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) +
   ) +
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Slow speed-cluster: Duration impact on Score by Is_Student")
+  ggtitle("Slow (Trimmed): Test Duration X Test Score by Student Status")
