@@ -321,7 +321,7 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) +
   ) +
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("All: Duration impact on Score by Is_Student")
+  ggtitle("All: Test Duration x Test Score by Student Status")
 
 
 ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + 
@@ -338,7 +338,7 @@ theme_minimal()+
   ) +
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Fast speed-cluster: Duration impact on Score by Is_student")
+  ggtitle("Fast speed-cluster: Test Duration x Test Score by Student Status")
 
 ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
