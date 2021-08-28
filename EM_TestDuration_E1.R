@@ -190,25 +190,22 @@ whereas student and non-student only considered age and years_experience
 #Load data from demographics and qualification test Experiment-1
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 df_consent <- load_consent_create_indexes(load_is_student=1)
+df_consent <- distinct(df_consent)
 
 #remove rows without is_student label
 df_consent <- df_consent[complete.cases(df_consent$is_student),];
 df_consent$testDuration_fastMembership <- NA;
 
 #STUDENTS 
-#Remove outlier at 15 min
-row_to_keep = which(df_consent[df_consent$is_student==1 & df_consent$test_duration<14,])
-df_consent <- df_consent[row_to_keep,]
-summary(df_consent[df_consent$is_student==1,]$test_duration)
-dim(df_consent)
-plot(df_consent[df_consent$is_student==1,]$test_duration)
 
 choice <- 1;
 df_selected <- df_consent[df_consent$is_student==choice,]
-row_to_keep = which(df_selected$test_duration>14)
+#Remove outlier at 14 min
+row_to_keep = which(df_selected$test_duration<14)
+df_selected <- df_selected[row_to_keep,]
 summary(df_selected$test_duration)
 barplot(df_selected$test_duration)
-#df_selected <- df_selected[complete.cases(df_selected$is_student),]
+
 #build the EM model
 df_prior <- prior.df(wait = df_selected$test_duration)
 m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
@@ -216,9 +213,14 @@ df_selected <- compute_Memberships(m.step,df_selected)
 df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                      & 
                                         df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
- 
+
+#Attribute SLOW for the outlier
+df_consent[df_consent$test_duration>14,]$testDuration_fastMembership <- 0.0000 
+
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$is_student==1,]$test_duration,m.step,"Students E1")
+plot <- plot_mixture_models(df_selected$test_duration,m.step,"Students E1")
+
 plot
 
 #-------------
@@ -226,6 +228,8 @@ plot
 choice <- 0;
 
 df_selected <- df_consent[df_consent$is_student==choice,]
+summary(df_selected$test_duration)
+barplot(df_selected$test_duration)
 
 df_prior <- prior.df(wait = df_selected$test_duration)
 m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
@@ -252,12 +256,12 @@ df_consent %>%
   summarize(count = n())
 #       is_student is_fast   count  proportion
 #           <int>   <lgl>   <int>   %
-# 1          0      FALSE     628   40%
-# 2          0      TRUE      958   60%
-#                   Sutotal  1586  100%
-# 3          1      FALSE      63   26%
-# 4          1      TRUE      178   74%
-#                   Sutotal   241  100%
+# 1          0      FALSE     154   380%
+# 2          0      TRUE      252   62%
+#                   Sutotal   406  100%
+# 3          1      FALSE      12   16%
+# 4          1      TRUE       65   84%
+#                   Sutotal    77  100%
 
 "Compared with the clusters computed over all participants, 
 the proportion of is_fast for non_student changed radically.
@@ -274,7 +278,7 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.080440, -0.22327) 
+#(all-aggregated, 0.07496, 0.05419) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
@@ -285,19 +289,24 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slo
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(non-students,0.071942,-0.2940)
+#(non-students,0.06614,-0.4629) 
+
+"
+Fast non-students, very weak correlation
+Slow non-students, the more they spent the worse they got
+"
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(students,0.2874,2.1211) 
+#(students,0.3156,0.11115) 
 
 "
 Students have a different behavior. 
-Fast students the longer they spend, higher score
-Slow students, the longer they spend, much higher their score.
+Fast students the longer they spend, much higher score
+Slow students, the longer they spend, a bit higher their score. (not much gain for slow students)
 " 
 "In conclusion, group membership within duration is a confounder for certain professions, 
 but not others.
@@ -363,6 +372,7 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
+  xlim(0,14)
   ylim(min(df_consent_slow$adjusted_score),max(df_consent_slow$adjusted_score)+1)+
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
