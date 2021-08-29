@@ -191,6 +191,7 @@ whereas student and non-student only considered age and years_experience
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 df_consent <- load_consent_create_indexes(load_is_student=1)
 df_consent <- distinct(df_consent)
+df_consent$is_student <- as.factor(df_consent$is_student)
 
 #remove rows without is_student label
 df_consent <- df_consent[complete.cases(df_consent$is_student),];
@@ -215,7 +216,7 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
                                         df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
 
 #Attribute SLOW for the outlier
-df_consent[df_consent$test_duration>14,]$testDuration_fastMembership <- 0.0000 
+df_consent[df_consent$test_duration>14 &df_consent$is_student==1,]$testDuration_fastMembership <- 0.0000 
 
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$is_student==1,]$test_duration,m.step,"Students E1")
@@ -244,7 +245,11 @@ plot
 
 #---------------
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+median_fast_membership <- median(df_consent$testDuration_fastMembership)
+df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+
+barplot(df_consent[df_consent$testDuration_fastMembership>median_fast_membership &
+                   df_consent$is_student==1,]$test_duration)
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
 path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
@@ -256,11 +261,11 @@ df_consent %>%
   summarize(count = n())
 #       is_student is_fast   count  proportion
 #           <int>   <lgl>   <int>   %
-# 1          0      FALSE     154   380%
-# 2          0      TRUE      252   62%
+# 1          0      FALSE     183   45%
+# 2          0      TRUE      223   55%
 #                   Sutotal   406  100%
-# 3          1      FALSE      12   16%
-# 4          1      TRUE       65   84%
+# 3          1      FALSE      58   75% >>>STUDENT ARE SLOWER
+# 4          1      TRUE       19   25%
 #                   Sutotal    77  100%
 
 "Compared with the clusters computed over all participants, 
@@ -278,18 +283,20 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.07496, 0.05419) 
+#(all-aggregated, 0.06402, -0.07105) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
 " 
 
+#------------
+#NON-STUDENTS
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==0,] )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==0,] )
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(non-students,0.06614,-0.4629) 
+#(non-students,0.06277,-0.2262) 
 
 "
 Fast non-students, very weak correlation
@@ -301,7 +308,7 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slo
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(students,0.3156,0.11115) 
+#(students,0.12823,0.1047) 
 
 "
 Students have a different behavior. 
@@ -314,18 +321,8 @@ but not others.
 #---------------
 #PLOTS to show this phenomenon
 
-df_consent$is_student <- as.factor(df_consent$is_student)
-df_consent_fast <- df_consent[df_consent$is_fast,]
-df_consent_slow <- df_consent[!df_consent$is_fast,]
-df_consent_slow <- rbind(df_consent_slow, c(1:100))
-
-#Filling NAs
-df_consent_slow[is.na(df_consent_slow$worker_id),]$is_student <- "1"
-df_consent_slow[is.na(df_consent_slow$worker_id),]$test_duration <- 0.5
-df_consent_slow[is.na(df_consent_slow$worker_id),]$adjusted_score <- 0
-df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
-
-
+#---
+#ALL
 ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
@@ -342,7 +339,8 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) +
   xlab("Test Duration (minutes)") +
   ggtitle("All: Test Duration x Test Score by Student Status")
 
-
+#----
+#FAST
 ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
@@ -360,6 +358,8 @@ theme_minimal()+
   xlab("Test Duration (minutes)") +
   ggtitle("Fast: Test Duration x Test Score by Student Status")
 
+#----
+#SLOW
 ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
@@ -372,7 +372,7 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
     plot.title = element_text(size=14),
     axis.text.x = element_text(angle = 0, hjust = 1, size=12)
   ) +
-  xlim(0,14)
+  #xlim(0,)+
   ylim(min(df_consent_slow$adjusted_score),max(df_consent_slow$adjusted_score)+1)+
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
@@ -386,17 +386,17 @@ t.test(students,non_students)
 # Welch Two Sample t-test
 # 
 # data:  students and non_students
-# t = -2.1623, df = 324.46, p-value = 0.03133
+# t = -0.84386, df = 107.46, p-value = 0.4006
 # alternative hypothesis: true difference in means is not equal to 0
 # 95 percent confidence interval:
-#   -0.31786057 -0.01500566
+#   -0.3921039  0.1579474
 # sample estimates:
 #   mean of x mean of y 
-# 2.527016  2.693449 
+# 2.576962  2.694040  
 
 "
-Eventhoug non-students have statistically significan higher average score, the
-slow group, the longer they spend, worse their score becomes.
+Diference not statistically significant
+So, fast non-students are probably as bad as the fast students.
 "
 #-----------------------------
 # Checking only the slow group
@@ -406,13 +406,13 @@ t.test(students,non_students)
 # Welch Two Sample t-test
 # 
 # data:  students and non_students
-# t = -0.53882, df = 77.269, p-value = 0.5916
+# t = -0.95821, df = 96.029, p-value = 0.3404
 # alternative hypothesis: true difference in means is not equal to 0
 # 95 percent confidence interval:
-#   -0.3446355  0.1978381
+#   -0.4683946  0.1634057
 # sample estimates:
 #   mean of x mean of y 
-# 2.391962  2.465360 
+# 2.309126  2.461620 
 "
 However, their average scores are not statistically significant distinct!
 So, slow non-students are probably as bad as the slow students.
@@ -424,7 +424,7 @@ So, slow non-students are probably as bad as the slow students.
 #Bingo! The relationship reverses. Now, both are positive, 
 #the longer they spend, higher the accuracy.
 
-df_cut <- df_consent_slow[df_consent_slow$test_duration<=0.75,]
+df_cut <- df_consent_slow[df_consent_slow$test_duration<=2,]
 
 ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
@@ -441,3 +441,35 @@ ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) +
   ylab("Adjusted score (adjusted_score)") +
   xlab("Test Duration (minutes)") +
   ggtitle("Slow (Trimmed): Test Duration X Test Score by Student Status")
+
+
+"
+Shows that people who are students, but took the same time as the slow non-students,
+are similar to the slow non-students. Similar w.r.t. the longer they took the worse
+their score got. So, we would need to distinguish between these two groups of 
+students.
+"
+
+df_cut <- df_consent_fast[df_consent_fast$test_duration<=16,]
+
+ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = is_student))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (adjusted_score)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Fast (Trimmed): Test Duration X Test Score by Student Status")
+
+
+"
+After trimming, there was not change in the signal of the correlation 
+between duration and score for fast people
+"
