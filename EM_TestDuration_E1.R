@@ -1,16 +1,17 @@
 "
 Gaussian Mixture Model for the test_duration in experiment E1
 
-Use the mixture model to categorize programmers into fast and slow groups w.r.t. test_duration
+Use the mixture model to categorize programmers into fast and slow groups 
+w.r.t. test_duration
 
+Analyze if students and non-students present the same correlations between
+adjusted_score and test_duration
 
-Dependencies:
-- depends on categories of programmers as Students and Not Students
+TODO:
+Fix this df_consent <- distinct(df_consent)
 
 
 "
-
-
 
 #-----------------------------------------------------------------------------------
 #scripts to run EM algorithm
@@ -197,9 +198,12 @@ df_consent$is_student <- as.factor(df_consent$is_student)
 df_consent <- df_consent[complete.cases(df_consent$is_student),];
 df_consent$testDuration_fastMembership <- NA;
 
+df_consent$group <- "non-student"
+df_consent[df_consent$is_student=="1",]$group <- "student"
+
 #STUDENTS 
 
-choice <- 1;
+choice <- "1";
 df_selected <- df_consent[df_consent$is_student==choice,]
 #Remove outlier at 14 min
 row_to_keep = which(df_selected$test_duration<14)
@@ -216,17 +220,16 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
                                         df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
 
 #Attribute SLOW for the outlier
-df_consent[df_consent$test_duration>14 &df_consent$is_student==1,]$testDuration_fastMembership <- 0.0000 
+df_consent[df_consent$test_duration>14 &df_consent$is_student==1,]$testDuration_fastMembership <- 1.0000 
 
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$is_student==1,]$test_duration,m.step,"Students E1")
-plot <- plot_mixture_models(df_selected$test_duration,m.step,"Students E1")
 
 plot
 
 #-------------
 #NON-STUDENTS
-choice <- 0;
+choice <- "0";
 
 df_selected <- df_consent[df_consent$is_student==choice,]
 summary(df_selected$test_duration)
