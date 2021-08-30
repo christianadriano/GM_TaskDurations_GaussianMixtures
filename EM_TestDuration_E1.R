@@ -330,7 +330,7 @@ but not others.
 #---
 #ALL
 ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = is_student))+
+  geom_point(aes(colour = group))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
   theme(
@@ -348,8 +348,8 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) +
 #----
 #FAST
 ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = is_student))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
 theme_minimal()+
   theme(
     legend.position="top",
@@ -367,8 +367,8 @@ theme_minimal()+
 #----
 #SLOW
 ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = is_student))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -401,7 +401,7 @@ t.test(students,non_students)
 # 2.576962  2.694040  
 
 "
-Diference not statistically significant
+Diference NOT statistically significant
 So, fast non-students are probably as bad as the fast students.
 "
 #-----------------------------
@@ -412,15 +412,15 @@ t.test(students,non_students)
 # Welch Two Sample t-test
 # 
 # data:  students and non_students
-# t = -0.95821, df = 96.029, p-value = 0.3404
+# t = -1.3316, df = 72.793, p-value = 0.1871
 # alternative hypothesis: true difference in means is not equal to 0
 # 95 percent confidence interval:
-#   -0.4683946  0.1634057
+#   -0.5600449  0.1114219
 # sample estimates:
 #   mean of x mean of y 
-# 2.309126  2.461620 
+# 2.265884  2.490195 
 "
-However, their average scores are not statistically significant distinct!
+However, their average scores are NOT statistically significant distinct!
 So, slow non-students are probably as bad as the slow students.
 "
 
@@ -433,8 +433,8 @@ So, slow non-students are probably as bad as the slow students.
 df_cut <- df_consent_slow[df_consent_slow$test_duration<=2,]
 
 ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = is_student))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -459,8 +459,8 @@ students.
 df_cut <- df_consent_fast[df_consent_fast$test_duration<=16,]
 
 ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = is_student))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -478,4 +478,32 @@ ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) +
 "
 After trimming, there was not change in the signal of the correlation 
 between duration and score for fast people
+"
+
+#REMOVE OUTLIER STUDENT WITH 14min, SO TRIM AT 8min
+df_cut <- df_consent_fast[df_consent_fast$test_duration<=8,]
+
+ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (adjusted_score)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("Fast (Trimmed outlier): Test Duration X Test Score by Student Status")
+
+
+"
+The difference in slopes became larger.
+Trimming at 16min, slope-student ~ 1/3, slope-nonStudent ~ 1/5, so rate of 1.67
+Whereas trimming at 8min slope-student ~ 1/2, slope-nonStudent ~ 1/4, so rate of 2
+Which is a gain of (2-1.67)/1.67 = 0.197 ~ 20%
+
 "
