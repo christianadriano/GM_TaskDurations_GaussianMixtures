@@ -264,11 +264,11 @@ df_consent %>%
   summarize(count = n())
 #       is_student is_fast   count  proportion
 #           <int>   <lgl>   <int>   %
-# 1          0      FALSE     183   45%
-# 2          0      TRUE      223   55%
+# 1          0      FALSE     193   48%
+# 2          0      TRUE      213   52%
 #                   Sutotal   406  100%
-# 3          1      FALSE      58   75% >>>STUDENT ARE SLOWER
-# 4          1      TRUE       19   25%
+# 3          1      FALSE      48   62% >>>STUDENT ARE SLOWER
+# 4          1      TRUE       29   38%
 #                   Sutotal    77  100%
 
 "Compared with the clusters computed over all participants, 
@@ -286,7 +286,7 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.06402, -0.07105) 
+#(all-aggregated, 0.06720, -0.06819) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
@@ -299,19 +299,22 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slo
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(non-students,0.06277,-0.2262) 
+#(non-students,0.06522,-0.09303) 
 
 "
 Fast non-students, very weak correlation
 Slow non-students, the more they spent the worse they got
 "
 
+#--------
+#STUDENTS
+
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(students,0.12823,0.1047) 
+#(students,0.18567,0.0760) 
 
 "
 Students have a different behavior. 
@@ -328,7 +331,7 @@ but not others.
 #ALL
 ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = is_student))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = is_student), se= FALSE)+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
