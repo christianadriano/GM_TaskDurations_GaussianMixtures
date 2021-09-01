@@ -31,7 +31,7 @@ df_consent$testDuration_fastMembership <- NA
 df_prior <- prior.df(wait = df_consent$test_duration)
 m.step <- main(wait = df_consent$test_duration, wait.summary.df=df_prior)
 df_consent <- compute_Memberships(m.step, df_consent)
-plot <- plot_mixture_models(df_consent$test_duration,m.step,"All")
+plot <- plot_mixture_models(df_consent$test_duration,m.step,"All E1")
 plot
 #---------------------------------------------------------
 #INVESTIGATE OUTCOMES
