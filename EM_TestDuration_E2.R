@@ -26,24 +26,24 @@ df_consent$testDuration_fastMembership <- NA
 df_prior <- prior.df(wait = df_consent$test_duration)
 m.step <- main(wait = df_consent$test_duration, wait.summary.df=df_prior)
 df_consent <- compute_Memberships(m.step, df_consent)
-plot <- plot_mixture_models(df_consent$test_duration,m.step,"All")
+plot <- plot_mixture_models(df_consent$test_duration,m.step,"All E2")
 plot
 #---------------------------------------------------------
 #INVESTIGATE OUTCOMES
 cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
          method="pearson")
-#Positive correlation = 0.2346014  
+#Positive correlation =0.2346014   
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = -0.2190735  
+#Positive correlation = 0.2514127  
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = 0.2190735 
+#Negative correlation = 0.2334522 
 
 #-----------------------------------------------------
 #REGRESSION MODELS WITH ADJUSTED SCORE
