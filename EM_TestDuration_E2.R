@@ -174,20 +174,25 @@ df_consent %>%
 The data is more balanced for all,except Professionals, who none fit in two Gaussians.
 "
 # MOST Subjects fall in the Fast Cluster
-# profession            is_fast count
-# <fct>                 <lgl>   <int>
-# 1 Professional          FALSE      65
-# 2 Professional          TRUE      352
-# 3 Programmer            FALSE       1
-# 4 Programmer            TRUE       48
-# 5 Hobbyist              FALSE      64
-# 6 Hobbyist              TRUE      420
-# 7 Graduate_Student      FALSE      59
-# 8 Graduate_Student      TRUE      224
-# 9 Undergraduate_Student FALSE      79
-# 10 Undergraduate_Student TRUE      364
-# 11 Other                 FALSE      11
-# 12 Other                 TRUE      101
+# profession              is_fast    count   %
+# <fct>                    <lgl>     <int>  <int>
+# 1 Professional           FALSE      184   44%
+# 2 Professional           TRUE       233   56%
+#                                     417
+# 3 Programmer             FALSE       14   29%
+# 4 Programmer             TRUE        35   71%
+#                                      49  
+# 5 Hobbyist               FALSE      216   45%
+# 6 Hobbyist               TRUE       268   55$
+#                                     484
+# 7 Graduate_Student       FALSE      181   64%
+# 8 Graduate_Student       TRUE       102   36%
+#                                     283
+# 9 Undergraduate_Student  FALSE      221   50%
+# 10 Undergraduate_Student TRUE       222   50%
+#                                     443
+# 11 Other                 FALSE       46   41%
+# 12 Other                 TRUE        66   59%
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
