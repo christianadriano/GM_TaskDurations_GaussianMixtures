@@ -20,8 +20,8 @@ the correlation is small and similar to the test_duration.
 - Regression models that try to combine memberships are interaction terms or additive terms,
 do not show improvement in explanation of the socre by the test_duration
 - For this reason, I decided to only explore the binary membership, if fast_membership>median, 
-than the participant was categorized as fast (is_fast==1), otherwise, the participants is part 
-of the slow cluster (is_fast==0).
+than the participant was categorized as fast (is_fast==TRUE), otherwise, the participants is part 
+of the slow cluster (is_fast==FALSE).
 
 
 "
@@ -133,26 +133,38 @@ Adjusted_Score has 60% weaker coefficients than qualification_score for E2
 #--------------------------------------
 #Hard clustering (not using the membership probability. Instead, using a categorical value - is_fast)
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
-View(df_consent[c("is_fast","testDuration_fastMembership")])
+median_fast_membership <- median(df_consent$testDuration_fastMembership);
+df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+
+
+#View(df_consent[c("is_fast","testDuration_fastMembership")])
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration,  data=df_consent_slow )
+summary(model_2_fast)
+summary(model_2_slow)
+#(fast/slow, test_duration)
+#(fast, 0.06344)
+#(slow, 0.20889) <<<<<<<<<<< SLOW has a strong positive correlation with score
+
+model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
+#(fast/slow, test_duration, testDuration_Membership)
+#(fast,  -0.2564,  10.8974)
+#(slow,  -1.1184,  11.7301)
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast )
-summary(model_2_fast)
-summary(model_2_slow)
+"
+This analysis does not show much, only that people in the slower cluster have a stronger
+association with score, i.e., they are being more thoroug, whereas the fast ones are slopier.
+So, w.r.t, interventions, this means that giving more time to faster people might not help....
+"
 
-model_2_fast_programmer <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
-model_2_slow_programmer <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_fast[df_consent_fast$profession=="Programmer",] )
-summary(model_2_fast_programmer)
-summary(model_2_slow_programmer)
+#---------------------------------------------------------
 
 df_consent %>% 
   group_by(profession,is_fast) %>% 
