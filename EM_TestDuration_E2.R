@@ -66,12 +66,15 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowM
 summary(model_2_fast)
 summary(model_2_slow)
 "
-All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.06 
+All the coefficients are significant (p-value<0.05) but Adjusted R-squared is small 0.06 
 Looking at the coefficients, we can see that not only the membership has a large effect.
 Membership: Coefficients(testDuration, testDuration_X_Membership)
-Fast: (0.033991,1.089948)
-Slow: (0.033991,-1.089948)
+Fast: (0.009346,1.553558)
+Slow: (0.009346,-1.553558)
 "
+#-----------------------------------------
+# ONLY fast/slow Membership as predictor
+
 model_3_all <- lm(formula = adjusted_score ~ test_duration, data=df_consent )
 model_4_fast <- lm(formula = adjusted_score ~ testDuration_fastMembership, data=df_consent )
 model_5_slow <- lm(formula = adjusted_score ~ testDuration_slowMembership, data=df_consent )
@@ -82,13 +85,14 @@ summary(model_5_slow)
 "
 All coefficients are significant (p-value<0.05), but Adjusted R-squared is small 0.04 
 Model: Coefficients(testDuration OR testDuration_X_Membership)
-model_3_all: (0.04997)
-model_4_fast: (2.08369)
-model_5_slow: (-2.08369)
+model_3_all: (0.11841)
+model_4_fast: (4.0755)
+model_5_slow: (-1.66675)
 
 "
 "Hence, overall, it seems that the membership information 
-slighlty improved the explainability of the adjusted_score score"
+slighlty improved the explainability of the adjusted_score score
+"
 
 #---------------------------------------------
 #REGRESSION MODELS WITH ORIGINAL SCORE
