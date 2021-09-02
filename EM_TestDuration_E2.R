@@ -13,6 +13,19 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//prior_kmeans_EM.R")
 source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//util//visualize_compute_membership.R")
 
+"
+Take-aways.
+- Both Slow and Fast memberships are positively correlated with score. The strenght of
+the correlation is small and similar to the test_duration. 
+- Regression models that try to combine memberships are interaction terms or additive terms,
+do not show improvement in explanation of the socre by the test_duration
+- For this reason, I decided to only explore the binary membership, if fast_membership>median, 
+than the participant was categorized as fast (is_fast==1), otherwise, the participants is part 
+of the slow cluster (is_fast==0).
+
+
+"
+
 
 #---------------------------------------------------------
 #----------------------------------
