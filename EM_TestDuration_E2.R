@@ -179,14 +179,14 @@ The data is more balanced for all,except Professionals, who none fit in two Gaus
 # 1 Professional           FALSE      184   44%
 # 2 Professional           TRUE       233   56%
 #                                     417
-# 3 Programmer             FALSE       14   29%
+# 3 Programmer             FALSE       14   29% <<<<<<<<<
 # 4 Programmer             TRUE        35   71%
 #                                      49  
 # 5 Hobbyist               FALSE      216   45%
 # 6 Hobbyist               TRUE       268   55$
 #                                     484
 # 7 Graduate_Student       FALSE      181   64%
-# 8 Graduate_Student       TRUE       102   36%
+# 8 Graduate_Student       TRUE       102   36% <<<<<<<<<
 #                                     283
 # 9 Undergraduate_Student  FALSE      221   50%
 # 10 Undergraduate_Student TRUE       222   50%
@@ -206,11 +206,11 @@ df_consent <- load_consent_create_indexes();
 profession_list <- as.character(unique(df_consent$profession))
 
 df_consent$testDuration_fastMembership <- NA
-for(profes in profession_list){
-  #profes <- profession_list[6]
+#for(profes in profession_list){
+  profes <- profession_list[5]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
-                            c("worker_id","file_name","test_duration")]
+                            c("worker_id","file_name","test_duration","profession")]
   df_prior <- prior.df(wait = df_selected$test_duration)
   m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
   df_selected <- compute_Memberships(m.step,df_selected) 
@@ -218,15 +218,17 @@ for(profes in profession_list){
                                      &
                                        df_consent$file_name %in% df_selected$file_name 
                                      & 
-                                        df_consent$profession==profes)] <- df_selected$testDuration_fastMembership
+                                        df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
  
   #plot model for the profession
-  plot <- plot_mixture_models(df_selected$test_duration,m.step,profes)
+  plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
   plot
- }
+ #}
 
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+median_fast_membership <- median(df_consent$testDuration_fastMembership);
+df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
 path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
