@@ -24,6 +24,30 @@ than the participant was categorized as fast (is_fast==TRUE), otherwise, the par
 of the slow cluster (is_fast==FALSE).
 
 
+TODO:
+- Merge Professional and Programmer (check)
+- Remove two outliers test_duration > 20min or >=15 (above whiskers)
+- Plot box plots to remove outliers
+- Instead of outliers, I would just match the support of the distributions
+
+\begin{center}
+\begin{tabular}{ c | c }
+ profession & test duration (minutes)\\ [0.5ex] 
+ \hline \hline
+ Programmer & 25.25025 \\  
+ \hline
+ Other & 18.06738 \\
+ \hline
+ Professional & 16.3688\\
+ \hline
+ Hobbyist & 15.36393 \\
+ \hline
+ Undergraduate Student & 14.7441 \\
+ \hline
+ Graduate Student & 14.60075 \\ [0.5ex]
+\end{tabular}
+\end{center}
+
 "
 
 
@@ -134,7 +158,7 @@ Adjusted_Score has 60% weaker coefficients than qualification_score for E2
 #Hard clustering (not using the membership probability. Instead, using a categorical value - is_fast)
 df_consent$is_fast <- FALSE
 median_fast_membership <- median(df_consent$testDuration_fastMembership);
-df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+df_consent[df_consent$testDuration_fastMembership<=median_fast_membership,]$is_fast <- TRUE
 
 
 #View(df_consent[c("is_fast","testDuration_fastMembership")])
@@ -208,8 +232,8 @@ profession_list <- as.character(unique(df_consent$profession))
 df_consent$testDuration_fastMembership <- NA
 df_consent$is_fast <- FALSE
 
-#for(profes in profession_list){
-  profes <- profession_list[6]
+for(profes in profession_list){
+  #profes <- profession_list[6]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","test_duration","profession")]
@@ -225,7 +249,7 @@ df_consent$is_fast <- FALSE
   #Set flag based on fastMembership
   df_selected$is_fast <- FALSE
   median_fast_membership <- median(df_selected$testDuration_fastMembership);
-  df_selected[df_selected$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+  df_selected[df_selected$testDuration_fastMembership<=median_fast_membership,]$is_fast <- TRUE
   #Store flag in df_consent
   df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
                            &
@@ -236,9 +260,9 @@ df_consent$is_fast <- FALSE
   
   
   #plot model for the profession
-  plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
-  plot
- #}
+  #plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
+  #plot
+}
 
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
@@ -251,16 +275,16 @@ df_consent %>%
   summarize(count = n())
 #   profession            is_fast count
 #   <fct>                 <lgl>   <int>
-# 1 Professional          FALSE     208
-# 1 Professional          TRUE      209
-# 2 Programmer            FALSE      24
-# 3 Programmer            TRUE       25
+# 1 Professional          FALSE     177
+# 1 Professional          TRUE      240
+# 2 Programmer            FALSE      17
+# 3 Programmer            TRUE       32
 # 4 Hobbyist              FALSE     242      
 # 5 Hobbyist              TRUE      242
 # 6 Graduate_Student      FALSE     141
 # 7 Graduate_Student      TRUE      142
-# 8 Undergraduate_Student FALSE     221
-# 9 Undergraduate_Student TRUE      222
+# 8 Undergraduate_Student FALSE     175
+# 9 Undergraduate_Student TRUE      268
 # 10 Other                FALSE      56
 # 11 Other                TRUE       56
 
@@ -348,6 +372,31 @@ In conclusion, group membership within duration is a confounder for certain prof
 #---------------
 #PLOTS to show this phenomenon
 
+#---------------------
+minmax <- function(df_data){
+  profession_list <- as.character(unique(df_consent$profession))
+  max <- max(df_data$test_duration);
+  for(profes in profession_list){
+    aux <- max(df_data[df_data$profession==profes,]$test_duration)
+    if(aux<max)
+      max <- aux
+  }
+  return(max);
+}
+
+maxmin <- function(df_data){
+  profession_list <- as.character(unique(df_consent$profession))
+  min <- min(df_data$test_duration);
+  for(profes in profession_list){
+    aux <- min(df_data[df_data$profession==profes,]$test_duration)
+    if(aux>min)
+      min <- aux
+  }
+  return(min);
+}
+
+#--------------------
+
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_slow <- rbind(df_consent_slow, c(1:32))
@@ -356,8 +405,12 @@ df_consent_slow[is.na(df_consent_slow$worker_id),]$test_duration <- 0.5
 df_consent_slow[is.na(df_consent_slow$worker_id),]$adjusted_score <- 0
 df_consent_slow[is.na(df_consent_slow$worker_id),]$is_fast <- FALSE
 
+max <- minmax(df_consent)
+min <- maxmin(df_consent)
+df_support <- df_consent[df_consent$test_duration<=max & 
+                           df_consent$test_duration>=min,]
 
-ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
+ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
@@ -373,7 +426,16 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
   ggtitle("All: Duration impact on Score by Profession")
 
 
-ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
+#-----------
+#FAST GROUPS
+
+max <- minmax(df_consent_fast)
+min <- maxmin(df_consent_fast)
+df_support <- df_consent_fast[df_consent_fast$test_duration<=max & 
+                                df_consent_fast$test_duration>=min,]
+
+
+ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
 theme_minimal()+
   theme(
@@ -388,7 +450,16 @@ theme_minimal()+
   xlab("Test Duration (minutes)") +
   ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
 
-ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
+#------------
+# SLOW GROUPS
+
+max <- minmax(df_consent_slow)
+min <- maxmin(df_consent_slow)
+df_support <- df_consent_slow[df_consent_slow$test_duration<=max & 
+                                df_consent_slow$test_duration>=min,]
+
+
+ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
