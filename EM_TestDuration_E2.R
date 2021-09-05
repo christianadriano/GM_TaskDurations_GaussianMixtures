@@ -206,6 +206,8 @@ df_consent <- load_consent_create_indexes();
 profession_list <- as.character(unique(df_consent$profession))
 
 df_consent$testDuration_fastMembership <- NA
+df_consent$is_fast <- FALSE
+
 #for(profes in profession_list){
   profes <- profession_list[6]
   print(profes)
@@ -220,14 +222,23 @@ df_consent$testDuration_fastMembership <- NA
                                      & 
                                         df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
  
+  #Set flag based on fastMembership
+  df_selected$is_fast <- FALSE
+  median_fast_membership <- median(df_selected$testDuration_fastMembership);
+  df_selected[df_selected$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+  #Store flag in df_consent
+  df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
+                           &
+                          df_consent$file_name %in% df_selected$file_name 
+                           & 
+                          df_consent$profession %in% df_selected$profession)] <- df_selected$is_fast;
+  
+  
+  
   #plot model for the profession
   plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
   plot
  #}
-
-df_consent$is_fast <- FALSE
-median_fast_membership <- median(df_consent$testDuration_fastMembership);
-df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
 
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
@@ -240,17 +251,20 @@ df_consent %>%
   summarize(count = n())
 #   profession            is_fast count
 #   <fct>                 <lgl>   <int>
-# 1 Professional          TRUE      417
-# 2 Programmer            FALSE      13
-# 3 Programmer            TRUE       36
-# 4 Hobbyist              FALSE      44
-# 5 Hobbyist              TRUE      440
-# 6 Graduate_Student      FALSE      23
-# 7 Graduate_Student      TRUE      260
-# 8 Undergraduate_Student FALSE      59
-# 9 Undergraduate_Student TRUE      384
-# 10 Other                FALSE      11
-# 11 Other                TRUE      101
+# 1 Professional          FALSE     208
+# 1 Professional          TRUE      209
+# 2 Programmer            FALSE      24
+# 3 Programmer            TRUE       25
+# 4 Hobbyist              FALSE     242      
+# 5 Hobbyist              TRUE      242
+# 6 Graduate_Student      FALSE     141
+# 7 Graduate_Student      TRUE      142
+# 8 Undergraduate_Student FALSE     221
+# 9 Undergraduate_Student TRUE      222
+# 10 Other                FALSE      56
+# 11 Other                TRUE       56
+
+"Distribution now is 50% fast and 50% slow within each profession"
 
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
