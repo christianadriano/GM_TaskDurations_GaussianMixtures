@@ -423,7 +423,7 @@ ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
   ) +
   ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("All: Duration impact on Score by Profession")
+  ggtitle("All E2: Duration impact on Score by Profession")
 
 
 #-----------
@@ -448,7 +448,7 @@ theme_minimal()+
   ) +
   ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Fast speed-cluster: Duration impact on Score by Profession")
+  ggtitle("Fast E2: Duration impact on Score by Profession")
 
 #------------
 # SLOW GROUPS
@@ -472,7 +472,7 @@ ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
   ) +
   ylab("Score (Adjusted)") +
   xlab("Test Duration (minutes)") +
-  ggtitle("Slow speed-cluster: Duration impact on Score by Profession")
+  ggtitle("Slow E2: Duration impact on Score by Profession")
 
 
 
