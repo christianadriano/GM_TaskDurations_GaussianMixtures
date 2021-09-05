@@ -207,7 +207,7 @@ profession_list <- as.character(unique(df_consent$profession))
 
 df_consent$testDuration_fastMembership <- NA
 #for(profes in profession_list){
-  profes <- profession_list[5]
+  profes <- profession_list[6]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","test_duration","profession")]
