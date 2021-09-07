@@ -329,85 +329,7 @@ Othre&TRUE&56&50% \\ [0.5ex]
 \end{center}
 " 
 
-#-----------------------------------------------------------
-#Evaluate how fast and slow can explain adjusted_score score
-df_consent_fast <- df_consent[df_consent$is_fast,]
-df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-#by profession
-prof_choice <- "Programmer"
-
-#Starting from teh most complex to the most simplest model
-
-model_1_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ test_duration*testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_1_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership+ test_duration*testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
-summary(model_1_fast)
-summary(model_1_slow)
-
-model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
-summary(model_2_fast)
-summary(model_2_slow)
-
-model_3_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-model_3_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
-summary(model_3_fast)
-summary(model_3_slow)
-
-#model without segregation of fast slow
-model_4 <- lm(formula = adjusted_score ~ test_duration, data=df_consent[df_consent$profession==prof_choice,] )
-summary(model_4)
-"
-Professional coefficients
-Model1 (fast): test_duration (+)*, fastMembership(-)
-Model2 (fast): test_duration (+)*, fastMembership(+), interaction(-)
-Model3 (fast): test_duration (+)*
-Model4 (all): test_duration (+)
-
-Programmer coefficients 
-Model1 (fast, slow): test_duration (+,+)*, fastMembership (+, +)*, interaction (+,+)*
-Model2 (fast, slow): test_duration (-,+), fastMembership (-, -)
-Model3 (fast, slow): test_duration (-,+)*
-Model4 (all): test_duration (zero)
-
-Graduates coefficients 
-Model1 (fast, slow): test_duration (+,+), fastMembership (+, -), interaction (-,-)  
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
-
-Hobbyist coefficients
-Model1 (fast, slow): test_duration (-,+), fastMembership (-, -), interaction (+,-) 
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -)
-Model3 (fast, slow): test_duration (+,+)*
-Model4 (all): test_duration (+)*
-
-Undergrad coefficients
-Model1 (fast, slow): test_duration (+,+), fastMembership (+, -)*, interaction (-,-) 
-Model2 (fast, slow): test_duration (+,-), fastMembership (+, +)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
-
-  
-Other coefficients
-Model2 (fast, slow): test_duration (+,+), fastMembership (+, -), interaction (+,-)  
-Model3 (fast, slow): test_duration (+,-), fastMembership (+, +)
-Model3 (fast, slow): test_duration (+,-)*
-Model4 (all): test_duration (+)*
-
-
-Model 4 says that duration positively impacts score across all professions. However, this is not
-true when we look at individual groups discovered by the mixture models.
-Looking at Model 2 and Model 3, testDuration has a negative impact for slow group
-in the following professsions: Undergrad, Other, Grad. F
-Except for Programmer, duration has positive impact on score for the fast group across all other professions.
-Programmers have the reverse. The longer the slow group took better the score, whereas the fast group was the opposite.
-
-In conclusion, group membership within duration is a confounder for certain professions, but not others.
-
-
-
-" 
 #---------------
 #PLOTS to show this phenomenon
 
@@ -470,11 +392,11 @@ ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
 
 max <- minmax(df_consent_fast)
 min <- maxmin(df_consent_fast)
-df_support <- df_consent_fast[df_consent_fast$test_duration<=max & 
+df_support_fast <- df_consent_fast[df_consent_fast$test_duration<=max & 
                                 df_consent_fast$test_duration>=min,]
 
 
-ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
+ggplot(df_support_fast, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
 theme_minimal()+
   theme(
@@ -494,11 +416,11 @@ theme_minimal()+
 
 max <- minmax(df_consent_slow)
 min <- maxmin(df_consent_slow)
-df_support <- df_consent_slow[df_consent_slow$test_duration<=max & 
+df_support_slow <- df_consent_slow[df_consent_slow$test_duration<=max & 
                                 df_consent_slow$test_duration>=min,]
 
 
-ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
+ggplot(df_support_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colour = profession))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
@@ -514,4 +436,58 @@ ggplot(df_support, aes(x=test_duration, y=adjusted_score)) + geom_point(aes(colo
   ggtitle("Slow E2: Duration impact on Score by Profession")
 
 
+#-----------------------------------------------------------
+#-----------------------------------------------------------
+#Evaluate how fast and slow can explain adjusted_score score
+df_consent_fast <- df_consent[df_consent$is_fast,]
+df_consent_slow <- df_consent[!df_consent$is_fast,]
 
+#Compute proportion by profession, because professions have distinct testDuration averages
+profession_list <- as.character(unique(df_consent$profession))
+
+df_coeff <- data.frame(matrix(data=NA, nrow=18, ncol=5))
+colnames(df_coeff) <- c("profession","group","coefficient","p_value","adj_r_squared");
+
+i <- 1
+for(profes in profession_list){
+  #AGGREGATED
+  model_all <-  lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent$profession==prof_choice,] )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "ALL"
+  df_coeff$coefficient[i] <- model_all$coefficients[[2]]
+  df_coeff$p_value[i] <-  summary(model_all)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_all)$adj.r.squared
+  i <- i+1
+  
+  #FAST RESPONDERS
+  model_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "FAST"
+  df_coeff$coefficient[i] <- model_fast$coefficients[[2]]
+  df_coeff$p_value[i] <- summary(model_fast)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_fast)$adj.r.squared
+  i <- i+1
+  
+  #SLOW RESPONDERS
+  model_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "SLOW"
+  df_coeff$coefficient[i] <- model_slow$coefficients[[2]]
+  df_coeff$p_value[i] <-summary(model_slow)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_slow)$adj.r.squared
+  i <- i+1
+}
+
+df_coeff
+
+"
+Model 4 says that duration positively impacts score across all professions. However, this is not
+true when we look at individual groups discovered by the mixture models.
+Looking at Model 2 and Model 3, testDuration has a negative impact for slow group
+in the following professsions: Undergrad, Other, Grad. F
+Except for Programmer, duration has positive impact on score for the fast group across all other professions.
+Programmers have the reverse. The longer the slow group took better the score, whereas the fast group was the opposite.
+
+In conclusion, group membership within duration is a confounder for certain professions, but not others.
+
+" 
