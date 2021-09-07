@@ -273,22 +273,61 @@ write.csv(df_consent,paste0(path,"consent_with_testDuration_fastMembership.csv")
 df_consent %>% 
   group_by(profession,is_fast) %>% 
   summarize(count = n())
-#   profession            is_fast count
-#   <fct>                 <lgl>   <int>
-# 1 Professional          FALSE     177
-# 1 Professional          TRUE      240
-# 2 Programmer            FALSE      17
-# 3 Programmer            TRUE       32
-# 4 Hobbyist              FALSE     242      
-# 5 Hobbyist              TRUE      242
-# 6 Graduate_Student      FALSE     141
-# 7 Graduate_Student      TRUE      142
-# 8 Undergraduate_Student FALSE     175
-# 9 Undergraduate_Student TRUE      268
-# 10 Other                FALSE      56
-# 11 Other                TRUE       56
+
+
+#   profession            is_fast count    %
+#   <fct>                 <lgl>   <int>  <int>
+# 1 Professional          FALSE     177   42%
+# 1 Professional          TRUE      240   58%
+#                                   417  100%
+# 2 Programmer            FALSE      17   35%
+# 3 Programmer            TRUE       32   65%
+#                                        100%
+# 4 Hobbyist              FALSE     242   50%    
+# 5 Hobbyist              TRUE      242   50%
+#                                        100%
+# 6 Graduate_Student      FALSE     141   50%
+# 7 Graduate_Student      TRUE      142   50%
+#                                        100%
+# 8 Undergraduate_Student FALSE     175   40%
+# 9 Undergraduate_Student TRUE      268   60%
+#                                        100%
+# 10 Other                FALSE      56   50%
+# 11 Other                TRUE       56   50%
+#                                        100%
 
 "Distribution now is 50% fast and 50% slow within each profession"
+"
+\begin{center}
+\begin{tabular}{ c | c | c | c }
+profession & is fast? & group threshold & % \\ [0.5ex] 
+\hline \hline
+ Professional&FALSE&177&42% \\  
+\hline
+Professional&TRUE&240&58% \\
+\hline
+Programmer&FALSE&17&35% \\
+\hline
+Programmer&TRUE&32&65% \\
+\hline
+Hobbyist&FALSE&242&50% \\
+\hline
+Hobbyist&TRUE&242&50% \\ 
+\hline
+Graduate_Student&FALSE&141&50% \\ 
+\hline
+Graduate_Student&TRUE&142&50% \\ 
+\hline
+Undergraduate_Student&FALSE&175&40% \\ 
+\hline
+Undergraduate_Student&TRUE&268&60% \\
+\hline
+Other&FALSE&56&50% \\ 
+\hline
+Othre&TRUE&56&50% \\ [0.5ex]
+\end{tabular}
+\end{center}
+" 
 
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
