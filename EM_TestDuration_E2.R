@@ -490,4 +490,48 @@ Programmers have the reverse. The longer the slow group took better the score, w
 
 In conclusion, group membership within duration is a confounder for certain professions, but not others.
 
+\begin{center}
+\begin{tabular}{ c | c | c | c | c}
+             profession &group& coefficient& p_value&  adj_r_squared\\
+             \hline \hline
+               Hobbyist &ALL&    0.36& **&    0.08\\
+               \hline
+               Hobbyist &FAST&   0.15&  *&    0.01\\
+               \hline
+               Hobbyist &SLOW&   0.11& **&    0.04\\
+               \hline
+  Undergraduate_Student &ALL&    0.36& **&    0.08\\
+  \hline
+  Undergraduate_Student &FAST&   0.15&  *&    0.01\\
+  \hline
+  Undergraduate_Student &SLOW&   0.11& **&    0.04\\
+  \hline
+           Professional &ALL&    0.36& **&    0.08\\
+           \hline
+           Professional &FAST&   0.15&  *&    0.01\\
+           \hline
+           Professional &SLOW&   0.11& **&    0.04\\
+           \hline
+      Graduate_Student  &ALL&    0.36& **&    0.08\\
+      \hline
+      Graduate_Student  &FAST&   0.15&  *&    0.01\\
+      \hline
+      Graduate_Student  &SLOW&   0.11& **&    0.04\\
+      \hline
+                 Other  & ALL&   0.36& **&    0.08\\
+                 \hline
+                 Other  &FAST&   0.15&  *&    0.01\\
+                 \hline
+                 Other  &SLOW&   0.11& **&    0.04\\
+                 \hline
+            Programmer  & ALL&   0.36& **&    0.08\\
+            \hline
+            Programmer  &FAST&   0.15&  *&    0.01\\
+            \hline
+            Programmer  &SLOW&   0.11& **&    0.04\\[0.5ex]
+            \hline
+\end{tabular}
+\end{center}
+
+*=p-value>0.05, **=p-value<0.05
 " 
