@@ -439,6 +439,7 @@ ggplot(df_support_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
+df_consent <- df_consent[!is.na(data$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
@@ -451,7 +452,7 @@ colnames(df_coeff) <- c("profession","group","coefficient","p_value","adj_r_squa
 i <- 1
 for(profes in profession_list){
   #AGGREGATED
-  model_all <-  lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent$profession==prof_choice,] )
+  model_all <-  lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
   df_coeff$profession[i] <- profes
   df_coeff$group[i] <- "ALL"
   df_coeff$coefficient[i] <- model_all$coefficients[[2]]
@@ -537,45 +538,49 @@ In conclusion, group membership within duration is a confounder for certain prof
 " 
 
 #-----------------------------------------------------------
+#CORRELATIONS
 #Evaluate how fast and slow can explain adjusted_score score
+
+df_consent <- df_consent[!is.na(data$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
 #Compute proportion by profession, because professions have distinct testDuration averages
 profession_list <- as.character(unique(df_consent$profession))
 
-df_coeff <- data.frame(matrix(data=NA, nrow=18, ncol=5))
-colnames(df_coeff) <- c("profession","group","spearman","p_value","adj_r_squared");
+df_corr <- data.frame(matrix(data=NA, nrow=18, ncol=4))
+colnames(df_coeff) <- c("profession","group","tau","p_value");
 
 i <- 1
 for(profes in profession_list){
   #AGGREGATED
-  model_all <-  cor(y=adjusted_score, x=test_duration, method = c("spearman") ,data=df_consent_fast[df_consent$profession==prof_choice,],  )
-  df_coeff$profession[i] <- profes
-  df_coeff$group[i] <- "ALL"
-  df_coeff$coefficient[i] <- model_all$coefficients[[2]]
-  df_coeff$p_value[i] <-  summary(model_all)$coefficients[2,4]
-  df_coeff$adj_r_squared[i] <- summary(model_all)$adj.r.squared
+  profes="Professional"
+  data=df_consent[df_consent$profession==prof_choice,] 
+  model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$profession[i] <- profes
+  df_corr$group[i] <- "ALL"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #FAST RESPONDERS
-  model_fast <- cor(y= adjusted_score,x =test_duration,  method = c("spearman") ,data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
-  df_coeff$profession[i] <- profes
-  df_coeff$group[i] <- "FAST"
-  df_coeff$coefficient[i] <- model_fast$coefficients[[2]]
-  df_coeff$p_value[i] <- summary(model_fast)$coefficients[2,4]
-  df_coeff$adj_r_squared[i] <- summary(model_fast)$adj.r.squared
+  data=df_consent_fast[df_consent_fast$profession==prof_choice,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$profession[i] <- profes
+  df_corr$group[i] <- "FAST"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #SLOW RESPONDERS
-  model_slow <- cor(y=adjusted_score, x=test_duration, method = c("spearman") , data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
-  df_coeff$profession[i] <- profes
-  df_coeff$group[i] <- "SLOW"
-  df_coeff$coefficient[i] <- model_slow$coefficients[[2]]
-  df_coeff$p_value[i] <-summary(model_slow)$coefficients[2,4]
-  df_coeff$adj_r_squared[i] <- summary(model_slow)$adj.r.squared
+  data=df_consent_slow[df_consent_slow$profession==prof_choice,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$profession[i] <- profes
+  df_corr$group[i] <- "SLOW"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
   i <- i+1
 }
 
-df_coeff
+df_corr
 
