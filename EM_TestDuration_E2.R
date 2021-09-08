@@ -535,3 +535,47 @@ In conclusion, group membership within duration is a confounder for certain prof
 
 *=p-value>0.05, **=p-value<0.05
 " 
+
+#-----------------------------------------------------------
+#Evaluate how fast and slow can explain adjusted_score score
+df_consent_fast <- df_consent[df_consent$is_fast,]
+df_consent_slow <- df_consent[!df_consent$is_fast,]
+
+#Compute proportion by profession, because professions have distinct testDuration averages
+profession_list <- as.character(unique(df_consent$profession))
+
+df_coeff <- data.frame(matrix(data=NA, nrow=18, ncol=5))
+colnames(df_coeff) <- c("profession","group","spearman","p_value","adj_r_squared");
+
+i <- 1
+for(profes in profession_list){
+  #AGGREGATED
+  model_all <-  cor(y=adjusted_score, x=test_duration, method = c("spearman") ,data=df_consent_fast[df_consent$profession==prof_choice,],  )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "ALL"
+  df_coeff$coefficient[i] <- model_all$coefficients[[2]]
+  df_coeff$p_value[i] <-  summary(model_all)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_all)$adj.r.squared
+  i <- i+1
+  
+  #FAST RESPONDERS
+  model_fast <- cor(y= adjusted_score,x =test_duration,  method = c("spearman") ,data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "FAST"
+  df_coeff$coefficient[i] <- model_fast$coefficients[[2]]
+  df_coeff$p_value[i] <- summary(model_fast)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_fast)$adj.r.squared
+  i <- i+1
+  
+  #SLOW RESPONDERS
+  model_slow <- cor(y=adjusted_score, x=test_duration, method = c("spearman") , data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+  df_coeff$profession[i] <- profes
+  df_coeff$group[i] <- "SLOW"
+  df_coeff$coefficient[i] <- model_slow$coefficients[[2]]
+  df_coeff$p_value[i] <-summary(model_slow)$coefficients[2,4]
+  df_coeff$adj_r_squared[i] <- summary(model_slow)$adj.r.squared
+  i <- i+1
+}
+
+df_coeff
+
