@@ -439,7 +439,8 @@ ggplot(df_support_slow, aes(x=test_duration, y=adjusted_score)) + geom_point(aes
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
-df_consent <- df_consent[!is.na(data$adjusted_score),]
+
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
@@ -452,7 +453,10 @@ colnames(df_coeff) <- c("profession","group","coefficient","p_value","adj_r_squa
 i <- 1
 for(profes in profession_list){
   #AGGREGATED
-  model_all <-  lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+  #profes <- "Professional"
+  print(profes)
+  model_all <-  lm(formula = adjusted_score ~ test_duration, 
+                   data=df_consent_fast[df_consent_fast$profession==profes,] )
   df_coeff$profession[i] <- profes
   df_coeff$group[i] <- "ALL"
   df_coeff$coefficient[i] <- model_all$coefficients[[2]]
@@ -461,7 +465,8 @@ for(profes in profession_list){
   i <- i+1
   
   #FAST RESPONDERS
-  model_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$profession==prof_choice,] )
+  model_fast <- lm(formula = adjusted_score ~ test_duration, 
+                   data=df_consent_fast[df_consent_fast$profession==profes,] )
   df_coeff$profession[i] <- profes
   df_coeff$group[i] <- "FAST"
   df_coeff$coefficient[i] <- model_fast$coefficients[[2]]
@@ -470,7 +475,8 @@ for(profes in profession_list){
   i <- i+1
   
   #SLOW RESPONDERS
-  model_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$profession==prof_choice,] )
+  model_slow <- lm(formula = adjusted_score ~ test_duration, 
+                   data=df_consent_slow[df_consent_slow$profession==profes,] )
   df_coeff$profession[i] <- profes
   df_coeff$group[i] <- "SLOW"
   df_coeff$coefficient[i] <- model_slow$coefficients[[2]]
@@ -491,11 +497,31 @@ Programmers have the reverse. The longer the slow group took better the score, w
 
 In conclusion, group membership within duration is a confounder for certain professions, but not others.
 
+              profession group coefficient      p_value adj_r_squared
+1               Hobbyist   ALL  0.03013050 7.189049e-01  -0.003623666
+2               Hobbyist  FAST  0.03013050 7.189049e-01  -0.003623666
+3               Hobbyist  SLOW  0.12698675 1.564844e-03   0.036899962
+4  Undergraduate_Student   ALL  0.44329222 1.458968e-08   0.110571498
+5  Undergraduate_Student  FAST  0.44329222 1.458968e-08   0.110571498
+6  Undergraduate_Student  SLOW  0.02553075 5.754876e-01  -0.003953615
+7           Professional   ALL  0.14767861 5.081121e-02   0.011797886
+8           Professional  FAST  0.14767861 5.081121e-02   0.011797886
+9           Professional  SLOW  0.11377909 4.111188e-03   0.040638900
+10      Graduate_Student   ALL  0.30346900 6.380695e-03   0.045159744
+11      Graduate_Student  FAST  0.30346900 6.380695e-03   0.045159744
+12      Graduate_Student  SLOW  0.04077328 4.571889e-01  -0.003182469
+13                 Other   ALL  0.07197411 5.648487e-01  -0.012229633
+14                 Other  FAST  0.07197411 5.648487e-01  -0.012229633
+15                 Other  SLOW  0.03305288 6.113321e-01  -0.013614300
+16            Programmer   ALL  0.28187339 2.892559e-01   0.007311350
+17            Programmer  FAST  0.28187339 2.892559e-01   0.007311350
+18            Programmer  SLOW -0.06973515 2.892590e-01   0.007734466
+
 \begin{center}
 \begin{tabular}{ c | c | c | c | c}
              profession &group& coefficient& p_value&  adj_r_squared\\
              \hline \hline
-               Hobbyist &ALL&    0.36& **&    0.08\\
+               Hobbyist &ALL&    0.36& *&    0.08\\
                \hline
                Hobbyist &FAST&   0.15&  *&    0.01\\
                \hline
@@ -541,7 +567,7 @@ In conclusion, group membership within duration is a confounder for certain prof
 #CORRELATIONS
 #Evaluate how fast and slow can explain adjusted_score score
 
-df_consent <- df_consent[!is.na(data$adjusted_score),]
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
@@ -549,13 +575,13 @@ df_consent_slow <- df_consent[!df_consent$is_fast,]
 profession_list <- as.character(unique(df_consent$profession))
 
 df_corr <- data.frame(matrix(data=NA, nrow=18, ncol=4))
-colnames(df_coeff) <- c("profession","group","tau","p_value");
+colnames(df_corr) <- c("profession","group","tau","p_value");
 
 i <- 1
 for(profes in profession_list){
   #AGGREGATED
-  profes="Professional"
-  data=df_consent[df_consent$profession==prof_choice,] 
+#  profes="Professional"
+  data=df_consent[df_consent$profession==profes,] 
   model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
   df_corr$profession[i] <- profes
   df_corr$group[i] <- "ALL"
@@ -564,7 +590,7 @@ for(profes in profession_list){
   i <- i+1
   
   #FAST RESPONDERS
-  data=df_consent_fast[df_consent_fast$profession==prof_choice,] 
+  data=df_consent_fast[df_consent_fast$profession==profes,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
   df_corr$profession[i] <- profes
   df_corr$group[i] <- "FAST"
@@ -573,7 +599,7 @@ for(profes in profession_list){
   i <- i+1
   
   #SLOW RESPONDERS
-  data=df_consent_slow[df_consent_slow$profession==prof_choice,] 
+  data=df_consent_slow[df_consent_slow$profession==profes,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
   df_corr$profession[i] <- profes
   df_corr$group[i] <- "SLOW"
@@ -583,4 +609,43 @@ for(profes in profession_list){
 }
 
 df_corr
+
+"
+             profession group         tau      p_value
+1               Hobbyist   ALL  0.20407881 1.001840e-10
+2               Hobbyist  FAST  0.03023272 4.994611e-01
+3               Hobbyist  SLOW  0.12415854 6.065339e-03 <<<<<< SLOW==Thorough
+4  Undergraduate_Student   ALL  0.15420591 2.930439e-06
+5  Undergraduate_Student  FAST  0.21638641 4.610126e-07
+6  Undergraduate_Student  SLOW  0.03557003 4.972826e-01
+7           Professional   ALL  0.14398747 2.132846e-05
+8           Professional  FAST  0.09218619 3.997745e-02
+9           Professional  SLOW  0.12096225 2.098754e-02 <<<<<< SLOW==Thorough
+10      Graduate_Student   ALL  0.21342898 2.893049e-07
+11      Graduate_Student  FAST  0.15560948 8.567291e-03
+12      Graduate_Student  SLOW  0.03294088 5.831662e-01
+13                 Other   ALL  0.14638526 2.719661e-02
+14                 Other  FAST  0.07077811 4.580189e-01
+15                 Other  SLOW  0.05711839 5.497057e-01
+16            Programmer   ALL  0.03464737 7.347806e-01
+17            Programmer  FAST  0.18137083 2.194741e-01
+18            Programmer  SLOW -0.28296487 6.489748e-02
+
+
+\paragraph{Analsysi} - For Hobbyists and Professionals, SLOW groups have stronger correlation with score, 
+which means that slower responders are being more thorough than faster ones.
+Conversely, the reverse happens with students, whose slower responders do not do 
+better with more time than the faster ones. This might imply that the fast ones 
+are too fast, so any add in time improves their score a lot. 
+Interstingly programmers get worse with more time, which is the opposite of
+being thorough, i.e., their extra time is sign of being clueless. 
+The Others group show not distinction between fast and slow responders, which
+could be also a sign of being clueless. 
+
+\paragraph{Implications to design} - The groups who show signs of being clueless
+could benefit from interventions like given them hints, a simpler task or 
+being able to ask for help. Meanwhile, the groups who show thoroughness when 
+being slow responders, could be incentivized to give a second look at their
+answers if they are responding too fast.
+"
 
