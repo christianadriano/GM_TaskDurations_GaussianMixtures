@@ -43,12 +43,12 @@ cor.test(df_consent$adjusted_score,df_consent$test_duration,
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = -0.1033927   
+#Negative correlation = 0.1898573   
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
-#Positive correlation = 0.1033927  
+#Positive correlation = 0.1564428   
 
 #-----------------------------------------------------
 #REGRESSION MODELS
@@ -107,7 +107,8 @@ than the test_duration.
 #--------------------------------------
 #Hard clustering
 df_consent$is_fast <- FALSE
-df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+median_fast_membership <- median(df_consent$testDuration_fastMembership)
+df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
