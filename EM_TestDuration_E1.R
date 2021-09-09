@@ -152,6 +152,15 @@ df_consent %>%
   group_by(is_student,is_fast) %>% 
   summarize(count = n())
 
+#       is_student is_fast count
+#           <int> <lgl>   <int>
+# 1          0 FALSE      1445
+# 2          0 TRUE        141
+# 3          1 FALSE       239
+# 4          1 TRUE          2
+# 5         NA FALSE      3066
+# 6         NA TRUE        147
+
 
 # 61% of Subjects fall in the Fast Cluster 1112, 
 #while 715 are slow
@@ -604,11 +613,15 @@ whereas fast responders for both groups seem to benefit from having more time.
 "
 
 #-----------------------------------------------------------------------------
+# CORRELATIONS ON TRIMMED SUPPORT
 #Correlations on the trimmed data to fit supports of students and non-students
-df_trimmed_fast <- df_consent_fast[df_consent_fast$test_duration<=16,]
-df_trimmed_slow <- df_consent_slow[df_consent_slow$test_duration<=2,]
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),] #remove incomplete rows
 
-df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
+df_trimmed_fast <- df_consent_fast[df_consent_fast$test_duration<=8,]
+df_trimmed_slow <- df_consent_slow[df_consent_slow$test_duration<=2,]
+df_trimmed_all <- df_trimmed_fast 
+  
+
 df_consent_fast <- df_trimmed_fast[df_trimmed_fast$is_fast,]
 df_consent_slow <- df_trimmed_slow[!df_trimmed_slow$is_fast,]
 
@@ -618,7 +631,6 @@ colnames(df_corr) <- c("is_student","group","tau","p_value");
 i <- 1
 for(student in c("0","1")){
   if(student=="1"){ 
-    
     profes <- "student"
   }
   else{
