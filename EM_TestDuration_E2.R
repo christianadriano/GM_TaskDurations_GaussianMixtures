@@ -75,12 +75,12 @@ cor.test(df_consent$adjusted_score,df_consent$test_duration,
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
          method="pearson")
-#Positive correlation = 0.2514127  
+#Positive correlation = 0.2334522 
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="pearson")
-#Negative correlation = 0.2334522 
+#Negative correlation = 0.2514127  
 
 #-----------------------------------------------------
 #REGRESSION MODELS WITH ADJUSTED SCORE
@@ -171,16 +171,16 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration,  data=df_consent_sl
 summary(model_2_fast)
 summary(model_2_slow)
 #(fast/slow, test_duration)
-#(fast, 0.06344)
-#(slow, 0.20889) <<<<<<<<<<< SLOW has a strong positive correlation with score
+#(fast, 0.26294) <<<<<<<<<<< FAST has a strong positive correlation with score
+#(slow, 0.07491) 
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 #(fast/slow, test_duration, testDuration_Membership)
-#(fast,  -0.2564,  10.8974)
-#(slow,  -1.1184,  11.7301)
+#(fast,  -1.6163,  16.5009)
+#(slow,  -0.2780,  11.7301)
 
 "
 This analysis does not show much, only that people in the slower cluster have a stronger
@@ -200,23 +200,23 @@ The data is more balanced for all,except Professionals, who none fit in two Gaus
 # MOST Subjects fall in the Fast Cluster
 # profession              is_fast    count   %
 # <fct>                    <lgl>     <int>  <int>
-# 1 Professional           FALSE      184   44%
-# 2 Professional           TRUE       233   56%
+# 1 Professional           TRUE       184   44%
+# 2 Professional           FALSE      233   56%
 #                                     417
-# 3 Programmer             FALSE       14   29% <<<<<<<<<
-# 4 Programmer             TRUE        35   71%
+# 3 Programmer             TRUE        14   29% <<<<<<<<<
+# 4 Programmer             FALSE       35   71%
 #                                      49  
-# 5 Hobbyist               FALSE      216   45%
-# 6 Hobbyist               TRUE       268   55$
+# 5 Hobbyist               TRUE       216   45%
+# 6 Hobbyist               FALSE      268   55$
 #                                     484
-# 7 Graduate_Student       FALSE      181   64%
-# 8 Graduate_Student       TRUE       102   36% <<<<<<<<<
+# 7 Graduate_Student       TRUE       181   64%
+# 8 Graduate_Student       FALSE      102   36% <<<<<<<<<
 #                                     283
-# 9 Undergraduate_Student  FALSE      221   50%
-# 10 Undergraduate_Student TRUE       222   50%
+# 9 Undergraduate_Student  TRUE       268   60%
+# 10 Undergraduate_Student FALS       175   40%
 #                                     443
-# 11 Other                 FALSE       46   41%
-# 12 Other                 TRUE        66   59%
+# 11 Other                 TRUE        46   41%
+# 12 Other                 FALSE       66   59%
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -280,8 +280,8 @@ df_consent %>%
 # 1 Professional          FALSE     177   42%
 # 1 Professional          TRUE      240   58%
 #                                   417  100%
-# 2 Programmer            FALSE      17   35%
-# 3 Programmer            TRUE       32   65%
+# 2 Programmer            FALSE      24   50%
+# 3 Programmer            TRUE       25   50%
 #                                        100%
 # 4 Hobbyist              FALSE     242   50%    
 # 5 Hobbyist              TRUE      242   50%
@@ -613,23 +613,23 @@ df_corr
 "
              profession group         tau      p_value
 1               Hobbyist   ALL  0.20407881 1.001840e-10
-2               Hobbyist  FAST  0.03023272 4.994611e-01
+2               Hobbyist  FAST  0.03023272 4.994611e-01 <<<<<< SLOW==Clueless
 3               Hobbyist  SLOW  0.12415854 6.065339e-03 <<<<<< SLOW==Thorough
-4  Undergraduate_Student   ALL  0.15420591 2.930439e-06
+4  Undergraduate_Student   ALL  0.15420591 2.930439e-06 
 5  Undergraduate_Student  FAST  0.21638641 4.610126e-07
-6  Undergraduate_Student  SLOW  0.03557003 4.972826e-01
+6  Undergraduate_Student  SLOW  0.03557003 4.972826e-01 <<<<<< SLOW==Clueless
 7           Professional   ALL  0.14398747 2.132846e-05
 8           Professional  FAST  0.09218619 3.997745e-02
 9           Professional  SLOW  0.12096225 2.098754e-02 <<<<<< SLOW==Thorough
 10      Graduate_Student   ALL  0.21342898 2.893049e-07
 11      Graduate_Student  FAST  0.15560948 8.567291e-03
-12      Graduate_Student  SLOW  0.03294088 5.831662e-01
+12      Graduate_Student  SLOW  0.03294088 5.831662e-01 <<<<<< SLOW==Clueless
 13                 Other   ALL  0.14638526 2.719661e-02
 14                 Other  FAST  0.07077811 4.580189e-01
-15                 Other  SLOW  0.05711839 5.497057e-01
+15                 Other  SLOW  0.05711839 5.497057e-01 
 16            Programmer   ALL  0.03464737 7.347806e-01
 17            Programmer  FAST  0.18137083 2.194741e-01
-18            Programmer  SLOW -0.28296487 6.489748e-02
+18            Programmer  SLOW -0.28296487 6.489748e-02 <<<<< SLOW ==Clueless 
 
 
 \paragraph{Analsysi} - For Hobbyists and Professionals, SLOW groups have stronger correlation with score, 
