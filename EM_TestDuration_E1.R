@@ -420,11 +420,41 @@ However, their average scores are NOT statistically significant distinct!
 So, slow non-students are probably as bad as the slow students.
 "
 
-#-------------------------------
+#------------------------------------------------------------
+#TRIMMING TO MATCH SUPPORT OF DISTRIBUTIONS OF TEST DURATION
 #What if I cut-off at the max range of students?
 #Does the difference in correlation persist?
 #Bingo! The relationship reverses. Now, both are positive, 
 #the longer they spend, higher the accuracy.
+
+max(df_consent[df_consent$is_student=="1",]$test_duration)
+#>[1] 14.98905
+max(df_consent[df_consent$is_student=="0",]$test_duration)
+#>[1] 32.91568
+#However, 14.98 is an outlier, so we trimme at 8 
+
+df_trimmed_ALL <- df_consent[df_consent$test_duration<=8,]
+
+
+#ALL
+ggplot(df_trimmed_ALL, aes(x=test_duration, y=adjusted_score)) + 
+  geom_point(aes(colour = group))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  theme_minimal()+
+  theme(
+    legend.position="top",
+    legend.justification = "left",
+    panel.spacing = unit(0.1, "lines"),
+    strip.text.x = element_text(size = 12),
+    plot.title = element_text(size=14),
+    axis.text.x = element_text(angle = 0, hjust = 1, size=12)
+  ) +
+  ylab("Adjusted score (adjusted_score)") +
+  xlab("Test Duration (minutes)") +
+  ggtitle("All (Trimmed): Test Duration x Test Score by Student Status")
+
+#-------------------
+#SLOW
 
 df_cut <- df_consent_slow[df_consent_slow$test_duration<=2,]
 
@@ -452,9 +482,12 @@ their score got. So, we would need to distinguish between these two groups of
 students.
 "
 
-df_cut <- df_consent_fast[df_consent_fast$test_duration<=16,]
+#------------
+#FAST
 
-ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
+df_trimmed_FAST <- df_consent_fast[df_consent_fast$test_duration<=16,]
+
+ggplot(df_trimmed_FAST, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = group))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
@@ -477,9 +510,9 @@ between duration and score for fast people
 "
 
 #REMOVE OUTLIER STUDENT WITH 14min, SO TRIM AT 8min
-df_cut <- df_consent_fast[df_consent_fast$test_duration<=8,]
+df_trimmed_FAST <- df_consent_fast[df_consent_fast$test_duration<=8,]
 
-ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
+ggplot(df_trimmed_FAST, aes(x=test_duration, y=adjusted_score)) + 
   geom_point(aes(colour = group))+
   stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
   theme_minimal()+
@@ -500,7 +533,7 @@ ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) +
 The difference in slopes became larger.
 Trimming at 16min, slope-student ~ 1/3, slope-nonStudent ~ 1/5, so rate of 1.67
 Whereas trimming at 8min slope-student ~ 1/2, slope-nonStudent ~ 1/4, so rate of 2
-Which is a gain of (2-1.67)/1.67 = 0.197 ~ 20%
+Which corresponds to a relative change in slopes of 20%, i.e., (2-1.67)/1.67 = 0.197 ~ 20%
 
 "
 
@@ -559,11 +592,79 @@ df_corr
 "
    is_student group          tau      p_value
 1 non-student   ALL  0.223817502 2.818172e-10
-2 non-student   ALL  0.223817502 2.818172e-10
-3 non-student  FAST  0.260067166 1.716419e-07
-4 non-student  SLOW -0.009866645 8.491032e-01
-5     student   ALL  0.339129559 4.384008e-05
-6     student  FAST  0.449691390 1.155429e-03
+2 non-student  FAST  0.260067166 1.716419e-07 
+3 non-student  SLOW -0.009866645 8.491032e-01 <<<<<<< flat and non-significant
+4     student   ALL  0.339129559 4.384008e-05
+5     student  FAST  0.449691390 1.155429e-03 <<<<<<< fast student is must strongly correlated with score
+6     student  SLOW  0.039573866 7.164882e-01 <<<<<<< flat and non-significant
 
+Slow students and non-students do not seem to benefit from more time, 
+whereas fast responders for both groups seem to benefit from having more time.
 
 "
+
+#-----------------------------------------------------------------------------
+#Correlations on the trimmed data to fit supports of students and non-students
+df_trimmed_fast <- df_consent_fast[df_consent_fast$test_duration<=16,]
+df_trimmed_slow <- df_consent_slow[df_consent_slow$test_duration<=2,]
+
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
+df_consent_fast <- df_trimmed_fast[df_trimmed_fast$is_fast,]
+df_consent_slow <- df_trimmed_slow[!df_trimmed_slow$is_fast,]
+
+df_corr <- data.frame(matrix(data=NA, nrow=6, ncol=4))
+colnames(df_corr) <- c("is_student","group","tau","p_value");
+
+i <- 1
+for(student in c("0","1")){
+  if(student=="1"){ 
+    
+    profes <- "student"
+  }
+  else{
+    profes <- "non-student"
+  }
+  
+  #AGGREGATED
+  #  profes="Professional"
+  data=df_consent[df_consent$is_student==student,] 
+  model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "ALL"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+  
+  #FAST RESPONDERS
+  data=df_consent_fast[df_consent_fast$is_student==student,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "FAST"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+  
+  #SLOW RESPONDERS
+  data=df_consent_slow[df_consent_slow$is_student==student,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "SLOW"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+}
+
+df_corr
+
+"
+   is_student group          tau      p_value
+1 non-student   ALL  0.223817502 2.818172e-10
+2 non-student  FAST  0.260067166 1.716419e-07 
+3 non-student  SLOW -0.009866645 8.491032e-01 <<<<<<< flat and non-significant
+4     student   ALL  0.339129559 4.384008e-05
+5     student  FAST  0.449691390 1.155429e-03 <<<<<<< fast student is must strongly correlated with score
+6     student  SLOW  0.039573866 7.164882e-01 <<<<<<< flat and non-significant
+
+Slow students and non-students do not seem to benefit from more time, 
+whereas fast responders for both groups seem to benefit from having more time.
+
