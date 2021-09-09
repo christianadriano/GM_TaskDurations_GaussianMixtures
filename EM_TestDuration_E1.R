@@ -146,17 +146,13 @@ However, when only looking at students, these coefficients were stronger.
 
 " 
 
-#------------------------------------------------------------
-#However, since I am looking at groups, I should redo the 
-#fast/slow classification by group.
+#-------------------
 
 df_consent %>% 
   group_by(is_student,is_fast) %>% 
   summarize(count = n())
 
-" The proportions changed with respect to when we computed for all population.
-The data is more balanced for all,except Professionals, who none fit in two Gaussians.
-"
+
 # 61% of Subjects fall in the Fast Cluster 1112, 
 #while 715 are slow
 #Looking at the subjects who did not provide demographic information,
@@ -267,7 +263,7 @@ df_consent %>%
 # 1          0      FALSE     193   48%
 # 2          0      TRUE      213   52%
 #                   Sutotal   406  100%
-# 3          1      FALSE      48   62% >>>STUDENT ARE SLOWER
+# 3          1      FALSE      48   62% >>>STUDENTS ARE SLOWER
 # 4          1      TRUE       29   38%
 #                   Sutotal    77  100%
 
@@ -505,5 +501,63 @@ The difference in slopes became larger.
 Trimming at 16min, slope-student ~ 1/3, slope-nonStudent ~ 1/5, so rate of 1.67
 Whereas trimming at 8min slope-student ~ 1/2, slope-nonStudent ~ 1/4, so rate of 2
 Which is a gain of (2-1.67)/1.67 = 0.197 ~ 20%
+
+"
+
+#-----------------------------------------------------------
+#CORRELATIONS
+#Evaluate how fast and slow can explain adjusted_score score
+
+#-----------------------------
+# Checking only the slow group
+
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
+df_consent_fast <- df_consent[df_consent$is_fast,]
+df_consent_slow <- df_consent[!df_consent$is_fast,]
+
+df_corr <- data.frame(matrix(data=NA, nrow=6, ncol=4))
+colnames(df_corr) <- c("is_student","group","tau","p_value");
+
+i <- 1
+for(student in c("0","1")){
+  if(student=="1") 
+    profes <- "student"
+  else
+    profes <- "non-student"
+  
+  #AGGREGATED
+  #  profes="Professional"
+  data=df_consent[df_consent$is_student==student,] 
+  model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "ALL"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+  
+  #FAST RESPONDERS
+  data=df_consent_fast[df_consent_fast$is_student==student,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "FAST"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+  
+  #SLOW RESPONDERS
+  data=df_consent_slow[df_consent_slow$is_student==student,] 
+  model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
+  df_corr$is_student[i] <- profes
+  df_corr$group[i] <- "SLOW"
+  df_corr$tau[i] <- model$estimate
+  df_corr$p_value[i] <-  model$p.value
+  i <- i+1
+}
+
+df_corr
+
+"
+
+
 
 "
