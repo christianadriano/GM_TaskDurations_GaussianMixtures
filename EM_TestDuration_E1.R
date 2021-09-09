@@ -557,7 +557,13 @@ for(student in c("0","1")){
 df_corr
 
 "
-
+   is_student group          tau      p_value
+1 non-student   ALL  0.223817502 2.818172e-10
+2 non-student   ALL  0.223817502 2.818172e-10
+3 non-student  FAST  0.260067166 1.716419e-07
+4 non-student  SLOW -0.009866645 8.491032e-01
+5     student   ALL  0.339129559 4.384008e-05
+6     student  FAST  0.449691390 1.155429e-03
 
 
 "
