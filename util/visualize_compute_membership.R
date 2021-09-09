@@ -62,25 +62,23 @@ compute_Memberships <- function(mstep,df){
   p_1_vector <- pnorm(datapoints,mu_1,var_1)
   p_2_vector <- pnorm(datapoints,mu_2,var_2)
   
-  p_1_membership <- p_1_vector / (p_1_vector + p_2_vector)
-  p_2_membership <- p_2_vector / (p_1_vector + p_2_vector)
-
-  if(mu_1<mu_2){
+  print(paste0("mu_1:",mu_1))
+  print(paste0("mu_2:",mu_2))
+  
+  #Probability to be fast.
+  df$testDuration_fastMembership <- p_1_vector
+  #Probability to be slow.
+  df$testDuration_slowMembership <- p_2_vector
+  
+  "if(mu_1<mu_2){
     #smaller mu_1 means faster, so fast membership takes p1 
     df$testDuration_fastMembership <- p_1_vector
-    df$testDuration_slowMembership <- p_2_vector
+    df$testDuration_slowMembership <- 1-p_1_vector
   }else{
-    df$testDuration_fastMembership <- p_2_vector
-    df$testDuration_slowMembership <- p_1_vector
+    df$testDuration_fastMembership <- 1-p_1_membership
+    df$testDuration_slowMembership <- p_1_membership
   }
+  "
     
-    
-  # if(mu_1>mu_2){
-  #   df$testDuration_slowMembership <- p_1_membership
-  #   df$testDuration_fastMembership <- p_2_membership
-  # }else{
-  #   df$testDuration_slowMembership <- p_2_membership
-  #   df$testDuration_fastMembership <- p_1_membership
-  #}
   return(df)
 }
