@@ -66,11 +66,12 @@ compute_Memberships <- function(mstep,df){
   p_2_membership <- p_2_vector / (p_1_vector + p_2_vector)
 
   if(mu_1<mu_2){
-    df$testDuration_slowMembership <- p_1_vector
-    df$testDuration_fastMembership <- p_2_vector
-  }else{
-    df$testDuration_slowMembership <- p_2_vector
+    #smaller mu_1 means faster, so fast membership takes p1 
     df$testDuration_fastMembership <- p_1_vector
+    df$testDuration_slowMembership <- p_2_vector
+  }else{
+    df$testDuration_fastMembership <- p_2_vector
+    df$testDuration_slowMembership <- p_1_vector
   }
     
     
