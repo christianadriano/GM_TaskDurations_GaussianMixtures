@@ -233,7 +233,7 @@ df_consent$testDuration_fastMembership <- NA
 df_consent$is_fast <- FALSE
 
 for(profes in profession_list){
-  #profes <- profession_list[6]
+  profes <- profession_list[6]
   print(profes)
   df_selected <- df_consent[df_consent$profession==profes,
                             c("worker_id","file_name","test_duration","profession")]
@@ -246,10 +246,20 @@ for(profes in profession_list){
                                      & 
                                         df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
  
-  #Set flag based on fastMembership
+  df_consent$testDuration_slowMembership[which(df_consent$worker_id %in% df_selected$worker_id
+                                               &
+                                                 df_consent$file_name %in% df_selected$file_name 
+                                               & 
+                                                 df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_slowMembership
+  
+  
+   #Set flag based on fastMembership
   df_selected$is_fast <- FALSE
   median_fast_membership <- median(df_selected$testDuration_fastMembership);
-  df_selected[df_selected$testDuration_fastMembership<=median_fast_membership,]$is_fast <- TRUE
+  print(median_fast_membership)
+  median_slow_membership <- median(df_selected$testDuration_slowMembership)
+  print(median_slow_membership)
+  df_selected[df_selected$testDuration_fastMembership>=df_selected$testDuration_slowMembership,]$is_fast <- TRUE
   #Store flag in df_consent
   df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
                            &
@@ -260,8 +270,8 @@ for(profes in profession_list){
   
   
   #plot model for the profession
-  #plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
-  #plot
+  plot <- plot_mixture_models(df_selected$test_duration,m.step,paste0(profes," E2"))
+  plot
 }
 
 
