@@ -8,8 +8,9 @@ Analyze if students and non-students present the same correlations between
 adjusted_score and test_duration
 
 TODO:
-Fix this df_consent <- distinct(df_consent)
-
+- Fix this df_consent <- distinct(df_consent) in load_consent_create_indexex_E1
+- Rerun plots and 
+- Rerun correlations for trimmed data.
 
 "
 
@@ -23,6 +24,8 @@ source("C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 #Load data from demographics and qualification test Experiment-1
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 df_consent <- load_consent_create_indexes(load_is_student=1)
+df_consent <- distinct(df_consent) #remove duplicated lines
+dim(df_consent)
 
 #----------------------------------
 #ALL
@@ -37,18 +40,23 @@ plot
 #INVESTIGATE OUTCOMES
 cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
-         method="pearson")
-#Positive correlation = 0.1882553  
+         method="kendall")
+#correlation = 0.09240252   
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
-         method="pearson")
-#Negative correlation = 0.1898573   
+         method="kendall")
+#correlation = 0.09240252     
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
-         method="pearson")
-#Positive correlation = 0.1564428   
+         method="kendall")
+#correlation = 0.09240737     
+
+"
+Correlation of adjusted_score and membership to speed of response is 
+very small, 0.09, which is the same as test_duration.
+"
 
 #-----------------------------------------------------
 #REGRESSION MODELS
@@ -106,12 +114,17 @@ than the test_duration.
 
 #--------------------------------------
 #Hard clustering
-df_consent$is_fast <- FALSE
-median_fast_membership <- median(df_consent$testDuration_fastMembership)
-df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
+df_consent$is_fast <- NA
+df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
+df_consent[df_consent$testDuration_fastMembership<0.5,]$is_fast <- FALSE
+df_consent <- df_consent[!is.na(df_consent$is_fast),]
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
+
+summary(df_consent[df_consent$testDuration_fastMembership>=0.5,]$test_duration)
+summary(df_consent[df_consent$testDuration_fastMembership<0.5,]$test_duration)
+
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_slow )
@@ -616,7 +629,7 @@ whereas fast responders for both groups seem to benefit from having more time.
 #-----------------------------------------------------------------------------
 # CORRELATIONS ON TRIMMED SUPPORT
 #Correlations on the trimmed data to fit supports of students and non-students
-df_consent <- df_consent[!is.na(df_consent$adjusted_score),] #remove incomplete rows
+#df_consent <- df_consent[!is.na(df_consent$adjusted_score),] #remove incomplete rows
 
 df_trimmed_fast <- df_consent_fast[df_consent_fast$test_duration<=8,]
 df_trimmed_slow <- df_consent_slow[df_consent_slow$test_duration<=2,]
