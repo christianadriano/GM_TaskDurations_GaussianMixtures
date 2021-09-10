@@ -64,11 +64,13 @@ compute_Memberships <- function(mstep,df){
   
   print(paste0("mu_1:",mu_1))
   print(paste0("mu_2:",mu_2))
+  print(paste0("var_1:",var_1))
+  print(paste0("var_2:",var_2))
   
-  #Probability to be fast.
-  df$testDuration_fastMembership <- p_1_vector
+  #Probability to be fast (normalized to probability of being slow)
+  df$testDuration_fastMembership <- p_1_vector /(p_1_vector+p_2_vector)
   #Probability to be slow.
-  df$testDuration_slowMembership <- p_2_vector
+  df$testDuration_slowMembership <- p_2_vector/(p_1_vector+p_2_vector)
   
   "if(mu_1<mu_2){
     #smaller mu_1 means faster, so fast membership takes p1 
