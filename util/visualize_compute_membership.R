@@ -67,7 +67,8 @@ compute_Memberships <- function(mstep,df){
   print(paste0("var_1:",var_1))
   print(paste0("var_2:",var_2))
   
-  #Probability to be fast (normalized to probability of being slow)
+  #Probability to be fast (normalized to probability of being slow, because
+  #the classification of membership does not necessarily add to 1.
   df$testDuration_fastMembership <- p_1_vector /(p_1_vector+p_2_vector)
   #Probability to be slow.
   df$testDuration_slowMembership <- p_2_vector/(p_1_vector+p_2_vector)
