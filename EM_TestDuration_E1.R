@@ -117,7 +117,7 @@ than the test_duration.
 df_consent$is_fast <- NA
 df_consent[df_consent$testDuration_fastMembership<df_consent$testDuration_slowMembership,]$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=df_consent$testDuration_slowMembership,]$is_fast <- TRUE
-df_consent <- df_consent[!is.na(df_consent$is_fast),]
+df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
@@ -126,38 +126,38 @@ summary(df_consent_slow$test_duration)
 summary(df_consent_fast$test_duration)
 
 
-
+#ALL
 model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.07035, -0.27952) 
+#(all-aggregated,-0.21653, 0.051223) 
 "
-Fast people the longer they spend, higher score
-Slow people, the longer they spend, lower their score.
+Slow people the longer they spend there is a slight improvement only (so they look more clueless)
+Fast people, the longer they spend, lower their score (so their first guess will not improve with more data)
 " 
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==0,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==0,] )
+#NON-STUDENTS
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student=="0",] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student=="0",] )
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(non-students,0.074119,-0.20392)
+#(non-students,-0.4283,0.06697) 
 
-model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student==1,] )
-model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student==1,] )
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student=="1",] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student=="1",] )
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(students,0.27250,-0.6462)
-
+#(students,-0.9643,0.23791)
 
 "
-Fast people the longer they spend, higher score
-Slow people, the longer they spend, lower their score.
-However, when only looking at students, these coefficients were stronger.
+Slow people the longer they spend, higher score
+Fast people, the longer they spend, lower their score.
+However, when only looking at students, these coefficients were much stronger.
 
 " 
 
