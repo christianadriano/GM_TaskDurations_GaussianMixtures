@@ -115,15 +115,16 @@ than the test_duration.
 #--------------------------------------
 #Hard clustering
 df_consent$is_fast <- NA
-df_consent[df_consent$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
-df_consent[df_consent$testDuration_fastMembership<0.5,]$is_fast <- FALSE
+df_consent[df_consent$testDuration_fastMembership<df_consent$testDuration_slowMembership,]$is_fast <- FALSE
+df_consent[df_consent$testDuration_fastMembership>=df_consent$testDuration_slowMembership,]$is_fast <- TRUE
 df_consent <- df_consent[!is.na(df_consent$is_fast),]
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 
-summary(df_consent[df_consent$testDuration_fastMembership>=0.5,]$test_duration)
-summary(df_consent[df_consent$testDuration_fastMembership<0.5,]$test_duration)
+summary(df_consent_slow$test_duration)
+summary(df_consent_fast$test_duration)
+
 
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
