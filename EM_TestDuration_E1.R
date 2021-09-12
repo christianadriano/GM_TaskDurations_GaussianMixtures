@@ -172,19 +172,32 @@ summary(model_2_slow)
 #(non-students,-0.4283,0.06697) 
 
 "
-Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time.
+Fast non-students, the longer they spend, lower their score, showing that this group would not benefit from more time.
 Slow non-students the longer they spend, not significant improvement on score, so their are more clueless than thorough
 "
 
 cor.test(df_consent_fast[df_consent_fast$is_student=="0",]$test_duration,df_consent_fast[df_consent_fast$is_student=="0",]$adjusted_score, method=c("kendall"))
-#FAST z = -1.3791, p-value = 0.1679, tau = -0.0806432
+#FAST z = -1.3791, p-value = 0.1679, tau = -0.0806432 -> no correlation
 cor.test(df_consent_slow[df_consent_slow$is_student=="0",]$test_duration,df_consent_slow[df_consent_slow$is_student=="0",]$adjusted_score, method=c("kendall"))
 #SLOW z = 5.5661, p-value = 2.606e-08, tau = 0.2531211 -> medium strength \cite{} 
 
 "
-Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time.
+Fast non-students, the longer they spend, there is no relevant effect on their score, showing that this group would not benefit from more time.
 Slow non-students the longer they spend, there is medium strength improvement on score, so their are more clueless than thorough
 "
+t.test(df_consent_fast[df_consent_fast$is_student=="0",]$adjusted_score,
+       df_consent_slow[df_consent_slow$is_student=="0",]$adjusted_score)
+
+# t = 3.165, df = 348.91, p-value = 0.001687
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#   0.1328920 0.5691434
+# sample estimates:
+#   mean of x mean of y 
+# 2.826320  2.475303 
+
+"fast non-students have higher score than slow ones"
+
 #-------------------
 
 #STUDENTS
@@ -211,7 +224,8 @@ cor.test(df_consent_slow[df_consent_slow$is_student=="1",]$test_duration,df_cons
 Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time, i.e., clueless.
 Slow students the longer they spend, higher score, so they are being thorough.
 " 
-t.test(df_consent_fast[df_consent_fast$is_student=="1",]$adjusted_score,df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score)
+t.test(df_consent_fast[df_consent_fast$is_student=="1",]$adjusted_score,
+       df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score)
 "t = -2.1493, df = 62.05, p-value = 0.03552
 alternative hypothesis: true difference in means is not equal to 0
 95 percent confidence interval:
@@ -224,6 +238,45 @@ Corroborating the clueless vs thorough interpretation, the fast students present
 mean score of fast vs thorough of slow, a t-test show statistically 
 significant difference (p-value=0.036) between the score of fast students (2.23) 
 and the slower students (2.77).
+"
+
+#-------------------
+
+#OTHERS
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[is.na(df_consent_fast$is_student),] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[is.na(df_consent_slow$is_student),] )
+summary(model_2_fast)
+summary(model_2_slow)
+#(filter,fast,slow)
+#(others,0.037149,-0.07966)
+
+"
+For Fast and Slow others, there was little effect of duraton on score
+" 
+cor.test(df_consent_fast[is.na(df_consent_fast$is_student),]$test_duration,df_consent_fast[is.na(df_consent_fast$is_student),]$adjusted_score, method=c("kendall"))
+#FAST z = 6.1327, p-value = 8.641e-10, tau = 0.1045339 -> no correlation
+cor.test(df_consent_slow[is.na(df_consent_slow$is_student),]$test_duration,df_consent_slow[is.na(df_consent_slow$is_student),]$adjusted_score, method=c("kendall"))
+#SLOW z = -0.31522, p-value = 0.7526, tau = -0.006245893 -> no correlation
+
+#In cor.test.default(df_consent_fast[df_consent_fast$is_student ==  :
+#Cannot compute exact p-value with ties
+
+"
+no correlation between test_duration and adjusted_score for others.
+" 
+t.test(df_consent_fast[is.na(df_consent_fast$is_student),]$adjusted_score,
+       df_consent_slow[is.na(df_consent_slow$is_student),]$adjusted_score)
+
+"t = 2.1652, df = 3054.9, p-value = 0.03045
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+  0.007753662 0.156480458
+sample estimates:
+  mean of x mean of y 
+0.9155045 0.8333874
+
+Fast others higher score than slower ones.
+
 "
 
 #-------------------
@@ -261,8 +314,11 @@ because Fast and Slow only considered test_duration,
 whereas student and non-student only considered age and years_experience
 "
 
-#----------------------------------------------------------------------
-#----------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+# REDO MEMBERSHIP BY GROUP
+#
 #Now compute the membership by each student, non-student, and others
 #because students and non-students have different mean values for test_duration.
 
