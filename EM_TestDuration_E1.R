@@ -51,11 +51,21 @@ cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
          method="kendall")
-#correlation = 0.09240737     
+#correlation = 0.09240737 (no correlation <0.15)    
 
 "
-Correlation of adjusted_score and membership to speed of response is 
-very small, 0.09, which is the same as test_duration.
+No correlation of adjusted_score and membership to speed of response is 
+no, 0.09, which is the same as test_duration.
+
+@article{kendall1948rank,
+  title={Rank correlation methods.},
+  author={Kendall, Maurice George},
+  year={1948},
+  publisher={Griffin},
+ url={https://archive.org/details/rankcorrelationm0000kend}
+}
+
+
 "
 
 #-----------------------------------------------------
@@ -118,12 +128,14 @@ df_consent$is_fast <- NA
 df_consent[df_consent$testDuration_fastMembership<df_consent$testDuration_slowMembership,]$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=df_consent$testDuration_slowMembership,]$is_fast <- TRUE
 df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
+df_consent <- df_consent[!is.na(df_consent$test_duration),]
+df_consent <- df_consent[!is.na(df_consent$is_fast),]
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 
-summary(df_consent_slow$test_duration)
-summary(df_consent_fast$test_duration)
+#summary(df_consent_slow$test_duration)
+#summary(df_consent_fast$test_duration)
 
 
 #ALL
@@ -138,6 +150,16 @@ summary(model_2_slow)
 Slow people the longer they spend there is a slight improvement only (so they look more clueless)
 Fast people, the longer they spend, lower their score (so their first guess will not improve with more data)
 " 
+cor.test(df_consent_fast$test_duration,df_consent_fast$adjusted_score, method=c("kendall"))
+#FAST z = -1.9102, p-value = 0.05611, tau = -0.03500714
+cor.test(df_consent_slow$test_duration,df_consent_slow$adjusted_score, method=c("kendall"))
+#SLOW 8.6626, p-value < 2.2e-16, tau = 0.1344702 -> no correlation 
+
+"
+Looking at the aggregated data, there is no correlation between test_duration and adjusted score.
+The aggregated data is being confounded by the is_fast covariate cluster, hence
+hidding the association between adjusted_score and test_duration, i.e., Simpsom's paradox.
+"
 
 #NON-STUDENTS
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student=="0",] )
@@ -147,6 +169,23 @@ summary(model_2_slow)
 #(filter,fast,slow)
 #(non-students,-0.4283,0.06697) 
 
+"
+Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time.
+Slow non-students the longer they spend, not significant improvement on score, so their are more clueless than thorough
+"
+
+cor.test(df_consent_fast[df_consent_fast$is_student=="0",]$test_duration,df_consent_fast[df_consent_fast$is_student=="0",]$adjusted_score, method=c("kendall"))
+#FAST z = -1.3791, p-value = 0.1679, tau = -0.0806432
+cor.test(df_consent_slow[df_consent_slow$is_student=="0",]$test_duration,df_consent_slow[df_consent_slow$is_student=="0",]$adjusted_score, method=c("kendall"))
+#SLOW z = 5.5661, p-value = 2.606e-08, tau = 0.2531211 -> medium strength \cite{} 
+
+"
+Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time.
+Slow non-students the longer they spend, there is medium strength improvement on score, so their are more clueless than thorough
+"
+#-------------------
+
+#STUDENTS
 model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[df_consent_fast$is_student=="1",] )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[df_consent_slow$is_student=="1",] )
 summary(model_2_fast)
@@ -155,11 +194,35 @@ summary(model_2_slow)
 #(students,-0.9643,0.23791)
 
 "
-Slow people the longer they spend, higher score
-Fast people, the longer they spend, lower their score.
-However, when only looking at students, these coefficients were much stronger.
-
+Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time.
+Slow students the longer they spend, higher score, so they are being thorough.
 " 
+cor.test(df_consent_fast[df_consent_fast$is_student=="1",]$test_duration,df_consent_fast[df_consent_fast$is_student=="1",]$adjusted_score, method=c("kendall"))
+#FAST z = -1.1155, p-value = 0.2646, tau = -0.1619848 -> medium correlation
+cor.test(df_consent_slow[df_consent_slow$is_student=="1",]$test_duration,df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score, method=c("kendall"))
+#SLOW z = 4.5492, p-value = 5.386e-06, tau = 0.4774625 -> strong correlation
+
+#In cor.test.default(df_consent_fast[df_consent_fast$is_student ==  :
+#Cannot compute exact p-value with ties
+
+"
+Fast students, the longer they spend, lower their score, showing that this group would not benefit from more time, i.e., clueless.
+Slow students the longer they spend, higher score, so they are being thorough.
+" 
+t.test(df_consent_fast[df_consent_fast$is_student=="1",]$adjusted_score,df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score)
+"t = -2.1493, df = 62.05, p-value = 0.03552
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+  -1.03729658 -0.03760625
+sample estimates:
+  mean of x mean of y 
+2.234947  2.772399 
+
+Corroborating the clueless vs thorough interpretation, the fast students present slower
+mean score of fast vs thorough of slow, a t-test show statistically 
+significant difference (p-value=0.036) between the score of fast students (2.23) 
+and the slower students (2.77).
+"
 
 #-------------------
 
