@@ -9,8 +9,9 @@ adjusted_score and test_duration
 
 TODO:
 - Fix this df_consent <- distinct(df_consent) in load_consent_create_indexex_E1
-- Rerun plots and 
-- Rerun correlations for trimmed data.
+- Rerun plots for OTHERS
+- Rerun correlations for trimmed data for OTHERS
+
 
 "
 
@@ -123,7 +124,8 @@ than the test_duration.
 "
 
 #--------------------------------------
-#Hard clustering
+# HARD CLUSTERING
+
 df_consent$is_fast <- NA
 df_consent[df_consent$testDuration_fastMembership<df_consent$testDuration_slowMembership,]$is_fast <- FALSE
 df_consent[df_consent$testDuration_fastMembership>=df_consent$testDuration_slowMembership,]$is_fast <- TRUE
@@ -231,27 +233,29 @@ df_consent %>%
   summarize(count = n())
 
 #       is_student is_fast count  %
-#           <int> <lgl>   <int> <int>
-# 1          0    FALSE       253   62%
-# 2          0    TRUE        153   38%
-#                             406
-# 3          1    FALSE        49   64%
-# 4          1    TRUE         28   36%
-#                              77
-# 5         NA    FALSE      1853   58%
-# 6         NA    TRUE       1360   42%
-#                            3213
+#           <int>  <lgl>   <int> <int>
+# 1          0     FALSE       253   62%
+# 2          0     TRUE        153   38%
+#                              406
+# 3          1     FALSE        49   64%
+# 4          1     TRUE         28   36%
+#                               77
+# 5         NA     FALSE      1853   58%
+# 6         NA     TRUE       1360   42%
+#                             3213
+#
 # TOTAL                      3696
 
-# 61% of Subjects fall in the Fast Cluster 1112, 
-#while 715 are slow
-#Looking at the subjects who did not provide demographic information,
-#57% (1844) are Fast and 42% (1369) are slow.
-#Among students and non-students the proportion is similar.
-#Non-Students:  Fast 61%, Slow 39%
-#Students: Fast 60%, Slow 40%
-
 "
+Compared with the clusters computed over all participants, 
+the proportion of is_fast for non_student changed radically.
+This shows the importance of computing this clustering by group. 
+
+Among all professions, the proportions of slow and fast are similar
+Non-Students:  Slow 62%, Fast 38%
+Students: Slow 64%, Fast 36%
+Others: Slow 58%, Fast 42%
+
 This homogeneous proportions across groups is very surprising, 
 because Fast and Slow only considered test_duration,
 whereas student and non-student only considered age and years_experience
@@ -269,11 +273,11 @@ df_consent <- distinct(df_consent)
 df_consent$is_student <- as.factor(df_consent$is_student)
 
 #remove rows without is_student label
-df_consent <- df_consent[complete.cases(df_consent$is_student),];
+#df_consent <- df_consent[complete.cases(df_consent$is_student),];
 df_consent$testDuration_fastMembership <- NA;
 
 df_consent$profession <- "non-student"
-df_consent[df_consent$is_student=="1",]$profession <- "student"
+df_consent[df_consent$is_student=="1" & !is.na(df_consent$is_student),"profession"] <- "student"
 df_consent[is.na(df_consent$is_student),]$profession <- "other"
 
 #------------
@@ -306,7 +310,7 @@ plot
 #NON-STUDENTS
 choice <- "non-student";
 
-df_selected <- df_consent[df_consent$is_student==choice,]
+df_selected <- df_consent[df_consent$profession==choice,]
 summary(df_selected$test_duration)
 barplot(df_selected$test_duration)
 
@@ -315,35 +319,38 @@ m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
 df_selected <- compute_Memberships(m.step,df_selected) 
 df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                              & 
-                                               df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
+                                               df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
 
 #plot model for the profession
-plot <- plot_mixture_models(df_consent[df_consent$is_student==0,]$test_duration,m.step,"Non-Students E1")
+plot <- plot_mixture_models(df_consent[df_consent$profession==choice,]$test_duration,m.step,"Non-Students E1")
 plot
 
-#---------------
+
+#-------------
+#OTHER
+choice <- "other";
+
+df_selected <- df_consent[df_consent$profession==choice,]
+summary(df_selected$test_duration)
+barplot(df_selected$test_duration)
+
+df_prior <- prior.df(wait = df_selected$test_duration)
+m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
+df_selected <- compute_Memberships(m.step,df_selected) 
+df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
+                                             & 
+                                               df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
+
+#plot model for the profession
+plot <- plot_mixture_models(df_consent[df_consent$profession==choice,]$test_duration,m.step,"Others E1")
+plot
+
+#-----------------------------------------------------------
 # WRITE FILE
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
 path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
 write.csv(df_consent,paste0(path,"E1_consent_with_testDuration_fastMembership.csv"));
-
-#Check the proportion across professions.
-df_consent %>% 
-  group_by(is_student,is_fast) %>% 
-  summarize(count = n())
-#       is_student is_fast   count  proportion
-#           <int>   <lgl>   <int>   %
-# 1          0      FALSE     193   48%
-# 2          0      TRUE      213   52%
-#                   Sutotal   406  100%
-# 3          1      FALSE      48   62% >>>STUDENTS ARE SLOWER
-# 4          1      TRUE       29   38%
-#                   Sutotal    77  100%
-
-"Compared with the clusters computed over all participants, 
-the proportion of is_fast for non_student changed radically.
-This shows the importance of computing this clustering by group. "
 
 #-----------------------------------------------------------
 #Evaluate how fast and slow can explain adjusted_score score
