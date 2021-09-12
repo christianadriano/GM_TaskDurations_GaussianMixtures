@@ -230,15 +230,18 @@ df_consent %>%
   group_by(is_student,is_fast) %>% 
   summarize(count = n())
 
-#       is_student is_fast count
-#           <int> <lgl>   <int>
-# 1          0 FALSE      1445
-# 2          0 TRUE        141
-# 3          1 FALSE       239
-# 4          1 TRUE          2
-# 5         NA FALSE      3066
-# 6         NA TRUE        147
-
+#       is_student is_fast count  %
+#           <int> <lgl>   <int> <int>
+# 1          0    FALSE       253   62%
+# 2          0    TRUE        153   38%
+#                             406
+# 3          1    FALSE        49   64%
+# 4          1    TRUE         28   36%
+#                              77
+# 5         NA    FALSE      1853   58%
+# 6         NA    TRUE       1360   42%
+#                            3213
+# TOTAL                      3696
 
 # 61% of Subjects fall in the Fast Cluster 1112, 
 #while 715 are slow
@@ -253,22 +256,10 @@ This homogeneous proportions across groups is very surprising,
 because Fast and Slow only considered test_duration,
 whereas student and non-student only considered age and years_experience
 "
-#DATA
-#   is_student is_fast count
-#         <int> <lgl>   <int>  <%*>
-# 1          0  FALSE     618   39%
-# 2          0  TRUE      968   61%
-# Subtotal               1586  100%                       
-# 3          1  FALSE      97   40%
-# 4          1  TRUE      144   60%
-# Subtotal                241  100% 
-# 5         NA  FALSE    1369   43%
-# 6         NA  TRUE     1844   57%
-# Subtotal               3213  100%
-#*rounded
+
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-#Now compute the membership by each student and non-student, 
+#Now compute the membership by each student, non-student, and others
 #because students and non-students have different mean values for test_duration.
 
 #Load data from demographics and qualification test Experiment-1
@@ -281,13 +272,14 @@ df_consent$is_student <- as.factor(df_consent$is_student)
 df_consent <- df_consent[complete.cases(df_consent$is_student),];
 df_consent$testDuration_fastMembership <- NA;
 
-df_consent$group <- "non-student"
-df_consent[df_consent$is_student=="1",]$group <- "student"
+df_consent$profession <- "non-student"
+df_consent[df_consent$is_student=="1",]$profession <- "student"
+df_consent[is.na(df_consent$is_student),]$profession <- "other"
 
+#------------
 #STUDENTS 
-
-choice <- "1";
-df_selected <- df_consent[df_consent$is_student==choice,]
+choice <- "student";
+df_selected <- df_consent[df_consent$profession==choice,]
 #Remove outlier at 14 min
 row_to_keep = which(df_selected$test_duration<14)
 df_selected <- df_selected[row_to_keep,]
@@ -300,19 +292,19 @@ m.step <- main(wait = df_selected$test_duration, wait.summary.df=df_prior)
 df_selected <- compute_Memberships(m.step,df_selected) 
 df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                      & 
-                                        df_consent$is_student %in% df_selected$is_student)] <- df_selected$testDuration_fastMembership
+                                        df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
 
 #Attribute SLOW for the outlier
-df_consent[df_consent$test_duration>14 &df_consent$is_student==1,]$testDuration_fastMembership <- 1.0000 
+df_consent[df_consent$test_duration>14 &df_consent$profession=="student",]$testDuration_fastMembership <- 1.0000 
 
 #plot model for the profession
-plot <- plot_mixture_models(df_consent[df_consent$is_student==1,]$test_duration,m.step,"Students E1")
+plot <- plot_mixture_models(df_consent[df_consent$profession=="student",]$test_duration,m.step,"Students E1")
 
 plot
 
 #-------------
 #NON-STUDENTS
-choice <- "0";
+choice <- "non-student";
 
 df_selected <- df_consent[df_consent$is_student==choice,]
 summary(df_selected$test_duration)
@@ -330,12 +322,7 @@ plot <- plot_mixture_models(df_consent[df_consent$is_student==0,]$test_duration,
 plot
 
 #---------------
-df_consent$is_fast <- FALSE
-median_fast_membership <- median(df_consent$testDuration_fastMembership)
-df_consent[df_consent$testDuration_fastMembership>=median_fast_membership,]$is_fast <- TRUE
-
-barplot(df_consent[df_consent$testDuration_fastMembership>median_fast_membership &
-                   df_consent$is_student==1,]$test_duration)
+# WRITE FILE
 
 #Save df_consent to file so we can retrieve the tesDuration_fast
 path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDurations//output//"
