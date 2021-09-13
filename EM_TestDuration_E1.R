@@ -530,6 +530,11 @@ kruskal.test(values, g)
 # data:  values and g
 # Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
 
+kruskal.test(adjusted_score ~ profession, data = df_consent)
+# data:  adjusted_score by profession
+# Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
+
+"The adjusted_scores are statistically significan distinct"
 
 t.test(students,non_students)
 
