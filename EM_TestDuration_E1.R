@@ -520,6 +520,17 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
 #---------------------------
 students <- df_consent[df_consent$is_student=="1",]$adjusted_score
 non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
+others <- df_consent[is.na(df_consent$is_student),]$adjusted_score
+values <- c(students,non_students,others)
+g <- factor(rep(1:3, c(length(students), length(non_students),length(others))),
+            labels = c("students",
+                       "non_students",
+                       "others"))
+kruskal.test(values, g)
+# data:  values and g
+# Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
+
+
 t.test(students,non_students)
 
 # Welch Two Sample t-test
@@ -537,6 +548,13 @@ t.test(students,non_students)
 Diference NOT statistically significant
 So, fast non-students are probably as bad as the fast students.
 "
+students <- df_consent[df_consent$is_student=="1",]$adjusted_score
+non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
+other <- df_consent
+t.test(students,non_students)
+
+
+
 #-----------------------------
 # Checking only the slow group
 students <- df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score
