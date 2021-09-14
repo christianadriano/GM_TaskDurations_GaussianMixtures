@@ -355,7 +355,7 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
                                         df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
 
 #Attribute SLOW for the outlier
-df_consent[df_consent$test_duration>14 &df_consent$profession=="student",]$testDuration_fastMembership <- 1.0000 
+df_consent[df_consent$test_duration>14 &df_consent$profession=="student",]$testDuration_fastMembership <- 0.0000 
 
 #hard clustering
 df_selected$is_fast <- NA
@@ -447,7 +447,7 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.049336, -0.06819) 
+#(all-aggregated, 0.012712, 0.21489) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
@@ -460,11 +460,11 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slo
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(non-students,0.06522,-0.09303) 
+#(non-students,-0.4629, 0.06614) 
 
 "
 Fast non-students, very weak correlation
-Slow non-students, the more they spent the worse they got
+Slow non-students, the more they spent the worse they got (Clueless)
 "
 
 #--------
@@ -475,7 +475,7 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slo
 summary(model_2_fast)
 summary(model_2_slow)
 #(filter,fast,slow)
-#(students,0.18567,0.0760) 
+#(students, 0.3156,0.11115) 
 
 "
 Students have a different behavior. 
@@ -491,8 +491,8 @@ but not others.
 #---
 #ALL
 ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -509,8 +509,8 @@ ggplot(df_consent, aes(x=test_duration, y=adjusted_score)) +
 #----
 #FAST
 ggplot(df_consent_fast, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
 theme_minimal()+
   theme(
     legend.position="top",
@@ -528,8 +528,8 @@ theme_minimal()+
 #----
 #SLOW
 ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -559,75 +559,23 @@ pairwise.t.test(df_consent$adjusted_score, df_consent$profession, p.adj = "bonf"
 # other   <2e-16      -     
 # student 1           <2e-16
 # p-value adjustment method: bonferroni 
-"Only Other versus student and non-student have statistically significant differences."
 
 ##FAST
 pairwise.t.test(df_consent_fast$adjusted_score, df_consent_fast$profession, p.adj = "bonf")
+#         non-student other
+# other   <2e-16      -     
+# student 1           <2e-16
+# p-value adjustment method: bonferroni 
 
+##SLOW
+pairwise.t.test(df_consent_slow$adjusted_score, df_consent_slow$profession, p.adj = "bonf")
+#         non-student other
+# other   < 2e-16     -      
+# student 0.88        1.2e-07
+# p-value adjustment method: bonferroni 
 
-#--------------------------------------------------------------
+"Only Other versus student and non-student have statistically significant differences."
 
-values <- c(students,non_students,others)
-g <- factor(rep(1:3, c(length(students), length(non_students),length(others))),
-            labels = c("students",
-                       "non_students",
-                       "others"))
-model <- kruskal.test(values, g)
-# data:  values and g
-# Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
-
-kruskal.test(adjusted_score ~ profession, data = df_consent)
-# data:  adjusted_score by profession
-# Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
-
-"The adjusted_scores are statistically significan distinct"
-
-t.test(students,non_students)
-
-# Welch Two Sample t-test
-# 
-# data:  students and non_students
-# t = -0.84386, df = 107.46, p-value = 0.4006
-# alternative hypothesis: true difference in means is not equal to 0
-# 95 percent confidence interval:
-#   -0.3921039  0.1579474
-# sample estimates:
-#   mean of x mean of y 
-# 2.576962  2.694040  
-
-"
-Diference NOT statistically significant
-So, fast non-students are probably as bad as the fast students.
-"
-students <- df_consent[df_consent$is_student=="1",]$adjusted_score
-non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
-other <- df_consent
-t.test(students,non_students)
-
-#---------------------------------------
-
-
-
-
-#-----------------------------
-# Checking only the slow group
-students <- df_consent_slow[df_consent_slow$is_student=="1",]$adjusted_score
-non_students <- df_consent_slow[df_consent_slow$is_student=="0",]$adjusted_score
-t.test(students,non_students)
-# Welch Two Sample t-test
-# 
-# data:  students and non_students
-# t = -1.3316, df = 72.793, p-value = 0.1871
-# alternative hypothesis: true difference in means is not equal to 0
-# 95 percent confidence interval:
-#   -0.5600449  0.1114219
-# sample estimates:
-#   mean of x mean of y 
-# 2.265884  2.490195 
-"
-However, their average scores are NOT statistically significant distinct!
-So, slow non-students are probably as bad as the slow students.
-"
 
 #------------------------------------------------------------
 #TRIMMING TO MATCH SUPPORT OF DISTRIBUTIONS OF TEST DURATION
@@ -636,10 +584,12 @@ So, slow non-students are probably as bad as the slow students.
 #Bingo! The relationship reverses. Now, both are positive, 
 #the longer they spend, higher the accuracy.
 
-max(df_consent[df_consent$is_student=="1",]$test_duration)
-#>[1] 14.98905
-max(df_consent[df_consent$is_student=="0",]$test_duration)
-#>[1] 32.91568
+max(df_consent[df_consent$profession=="student",]$test_duration)
+#>14.98905
+max(df_consent[df_consent$profession=="non-student",]$test_duration)
+#>32.91568
+max(df_consent[df_consent$profession=="other",]$test_duration)
+#39.74177
 #However, 14.98 is an outlier, so we trimme at 8 
 
 df_trimmed_ALL <- df_consent[df_consent$test_duration<=8,]
@@ -647,8 +597,8 @@ df_trimmed_ALL <- df_consent[df_consent$test_duration<=8,]
 
 #ALL
 ggplot(df_trimmed_ALL, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -668,8 +618,8 @@ ggplot(df_trimmed_ALL, aes(x=test_duration, y=adjusted_score)) +
 df_cut <- df_consent_slow[df_consent_slow$test_duration<=2,]
 
 ggplot(df_cut, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -697,8 +647,8 @@ students.
 df_trimmed_FAST <- df_consent_fast[df_consent_fast$test_duration<=16,]
 
 ggplot(df_trimmed_FAST, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -722,8 +672,8 @@ between duration and score for fast people
 df_trimmed_FAST <- df_consent_fast[df_consent_fast$test_duration<=8,]
 
 ggplot(df_trimmed_FAST, aes(x=test_duration, y=adjusted_score)) + 
-  geom_point(aes(colour = group))+
-  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = group), se= FALSE)+
+  geom_point(aes(colour = profession))+
+  stat_smooth(method = 'lm', formula = y ~ x, aes(colour = profession), se= FALSE)+
   theme_minimal()+
   theme(
     legend.position="top",
@@ -757,40 +707,37 @@ df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
-df_corr <- data.frame(matrix(data=NA, nrow=6, ncol=4))
-colnames(df_corr) <- c("is_student","group","tau","p_value");
+df_corr <- data.frame(matrix(data=NA, nrow=9, ncol=4))
+colnames(df_corr) <- c("profession","speed","tau","p_value");
+
+profession_list <- levels(df_consent$profession)
 
 i <- 1
-for(student in c("0","1")){
-  if(student=="1") 
-    profes <- "student"
-  else
-    profes <- "non-student"
+for(profession_name in profession_list){
   
-  #AGGREGATED
-  #  profes="Professional"
-  data=df_consent[df_consent$is_student==student,] 
+  #ALL
+  data=df_consent[df_consent$profession==profession_name,] 
   model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "ALL"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "ALL"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #FAST RESPONDERS
-  data=df_consent_fast[df_consent_fast$is_student==student,] 
+  data=df_consent_fast[df_consent_fast$profession==profession_name,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "FAST"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "FAST"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #SLOW RESPONDERS
-  data=df_consent_slow[df_consent_slow$is_student==student,] 
+  data=df_consent_slow[df_consent_slow$profession==profession_name,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "SLOW"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "SLOW"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
@@ -799,16 +746,20 @@ for(student in c("0","1")){
 df_corr
 
 "
-   is_student group          tau      p_value
-1 non-student   ALL  0.223817502 2.818172e-10
-2 non-student  FAST  0.260067166 1.716419e-07 
-3 non-student  SLOW -0.009866645 8.491032e-01 <<<<<<< flat and non-significant
-4     student   ALL  0.339129559 4.384008e-05
-5     student  FAST  0.449691390 1.155429e-03 <<<<<<< fast student is must strongly correlated with score
-6     student  SLOW  0.039573866 7.164882e-01 <<<<<<< flat and non-significant
+   profession speed          tau      p_value
+1 non-student   ALL  0.223817502 2.818172e-10 
+2 non-student  FAST -0.089383637 1.253101e-01 <<<<<<< flat and non-significant
+3 non-student  SLOW  0.248742006 4.753275e-08 <<<<<<< slow non-student is medium correlated with score
+4       other   ALL  0.081991860 1.974561e-10
+5       other  FAST  0.107083349 3.094079e-10
+6       other  SLOW -0.002585348 8.964378e-01 <<<<<<< flat and non-significant
+7     student   ALL  0.339129559 4.384008e-05
+8     student  FAST  0.356402212 8.390360e-05 <<<<<<< fast student is strongly correlated with score
+9     student  SLOW  0.277165727 2.304939e-01 <<<<<<< non-significant
 
-Slow students and non-students do not seem to benefit from more time, 
-whereas fast responders for both groups seem to benefit from having more time.
+Slow students and fast non-students do not seem to benefit from more time.
+Conversely, fast students and slow non-students seem to benefit from having more time.
+The others do not benefit of more time, regardless of speed.
 
 "
 
@@ -825,49 +776,43 @@ df_trimmed_all <- df_trimmed_fast
 df_consent_fast <- df_trimmed_fast[df_trimmed_fast$is_fast,]
 df_consent_slow <- df_trimmed_slow[!df_trimmed_slow$is_fast,]
 
-df_corr <- data.frame(matrix(data=NA, nrow=6, ncol=4))
-colnames(df_corr) <- c("is_student","group","tau","p_value");
+df_corr <- data.frame(matrix(data=NA, nrow=9, ncol=4))
+colnames(df_corr) <- c("profession","speed","tau","p_value");
+
+profession_list <- levels(df_consent$profession)
 
 i <- 1
-for(student in c("0","1")){
-  if(student=="1"){ 
-    profes <- "student"
-  }
-  else{
-    profes <- "non-student"
-  }
+for(profession_name in profession_list){
   
-  #AGGREGATED
-  #  profes="Professional"
-  data=df_consent[df_consent$is_student==student,] 
+  #ALL
+  data=df_consent[df_consent$profession==profession_name,] 
   model<-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "ALL"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "ALL"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #FAST RESPONDERS
-  data=df_consent_fast[df_consent_fast$is_student==student,] 
+  data=df_consent_fast[df_consent_fast$profession==profession_name,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "FAST"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "FAST"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
   
   #SLOW RESPONDERS
-  data=df_consent_slow[df_consent_slow$is_student==student,] 
+  data=df_consent_slow[df_consent_slow$profession==profession_name,] 
   model <-  cor.test(y=data$adjusted_score, x=data$test_duration, method = c("kendall"))
-  df_corr$is_student[i] <- profes
-  df_corr$group[i] <- "SLOW"
+  df_corr$profession[i] <- profession_name
+  df_corr$speed[i] <- "SLOW"
   df_corr$tau[i] <- model$estimate
   df_corr$p_value[i] <-  model$p.value
   i <- i+1
 }
 
 df_corr
-
 "
    is_student group          tau      p_value
 1 non-student   ALL  0.223817502 2.818172e-10
@@ -877,6 +822,15 @@ df_corr
 5     student  FAST  0.449691390 1.155429e-03 <<<<<<< fast student is must strongly correlated with score
 6     student  SLOW  0.039573866 7.164882e-01 <<<<<<< flat and non-significant
 
-Slow students and non-students do not seem to benefit from more time, 
-whereas fast responders for both groups seem to benefit from having more time.
+   profession speed          tau      p_value
+1 non-student   ALL  0.223817502 2.818172e-10
+2 non-student  FAST -0.089383637 1.253101e-01
+3 non-student  SLOW  0.066784626 5.323941e-01
+4       other   ALL  0.081991860 1.974561e-10
+5       other  FAST  0.088799173 7.076073e-07
+6       other  SLOW -0.002585348 8.964378e-01
+7     student   ALL  0.339129559 4.384008e-05
+8     student  FAST  0.356402212 8.390360e-05 <<<<< Only this is significant
+9     student  SLOW  0.119286416 6.280001e-01
 
+Only Fast Students benefit from more time.
