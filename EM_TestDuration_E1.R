@@ -327,14 +327,14 @@ source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding/
 df_consent <- load_consent_create_indexes(load_is_student=1)
 df_consent <- distinct(df_consent)
 df_consent$is_student <- as.factor(df_consent$is_student)
-
-#remove rows without is_student label
-#df_consent <- df_consent[complete.cases(df_consent$is_student),];
+df_consent$is_fast <- FALSE
 df_consent$testDuration_fastMembership <- NA;
 
-df_consent$profession <- "non-student"
+df_consent[df_consent$is_student=="0" & !is.na(df_consent$is_student),"profession"] <- "non-student"
 df_consent[df_consent$is_student=="1" & !is.na(df_consent$is_student),"profession"] <- "student"
 df_consent[is.na(df_consent$is_student),]$profession <- "other"
+df_consent$profession <- factor(df_consent$profession)
+
 
 #------------
 #STUDENTS 
@@ -357,6 +357,15 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
 #Attribute SLOW for the outlier
 df_consent[df_consent$test_duration>14 &df_consent$profession=="student",]$testDuration_fastMembership <- 1.0000 
 
+#hard clustering
+df_selected$is_fast <- NA
+df_selected[df_selected$testDuration_fastMembership<df_selected$testDuration_slowMembership,]$is_fast <- FALSE
+df_selected[df_selected$testDuration_fastMembership>=df_selected$testDuration_slowMembership,]$is_fast <- TRUE
+df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
+                         & 
+                           df_consent$profession %in% df_selected$profession)] <- df_selected$is_fast
+
+
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$profession=="student",]$test_duration,m.step,"Students E1")
 
@@ -377,6 +386,15 @@ df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_select
                                              & 
                                                df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
 
+#hard clustering
+df_selected$is_fast <- NA
+df_selected[df_selected$testDuration_fastMembership<df_selected$testDuration_slowMembership,]$is_fast <- FALSE
+df_selected[df_selected$testDuration_fastMembership>=df_selected$testDuration_slowMembership,]$is_fast <- TRUE
+df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
+                         & 
+                           df_consent$profession %in% df_selected$profession)] <- df_selected$is_fast
+
+
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$profession==choice,]$test_duration,m.step,"Non-Students E1")
 plot
@@ -396,6 +414,14 @@ df_selected <- compute_Memberships(m.step,df_selected)
 df_consent$testDuration_fastMembership[which(df_consent$worker_id %in% df_selected$worker_id
                                              & 
                                                df_consent$profession %in% df_selected$profession)] <- df_selected$testDuration_fastMembership
+#hard clustering
+df_selected$is_fast <- NA
+df_selected[df_selected$testDuration_fastMembership<df_selected$testDuration_slowMembership,]$is_fast <- FALSE
+df_selected[df_selected$testDuration_fastMembership>=df_selected$testDuration_slowMembership,]$is_fast <- TRUE
+df_consent$is_fast[which(df_consent$worker_id %in% df_selected$worker_id
+                                             & 
+                                               df_consent$profession %in% df_selected$profession)] <- df_selected$is_fast
+
 
 #plot model for the profession
 plot <- plot_mixture_models(df_consent[df_consent$profession==choice,]$test_duration,m.step,"Others E1")
@@ -409,7 +435,9 @@ path = "C://Users//Christian//Documents//GitHub//EM_GaussianMixtureModel_TaskDur
 write.csv(df_consent,paste0(path,"E1_consent_with_testDuration_fastMembership.csv"));
 
 #-----------------------------------------------------------
-#Evaluate how fast and slow can explain adjusted_score score
+# REGRESSION MODELS BY PROFESSION 
+# Evaluate how fast and slow can explain adjusted_score score
+
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
@@ -419,7 +447,7 @@ summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.06720, -0.06819) 
+#(all-aggregated, 0.049336, -0.06819) 
 "
 Fast people the longer they spend, higher score
 Slow people, the longer they spend, lower their score.
@@ -526,25 +554,18 @@ show how far each group is from each other.
 "
 
 ##Groups Aggregated
-students <- df_consent[df_consent$is_student=="1",]$adjusted_score
-non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
-others <- df_consent[is.na(df_consent$is_student),]$adjusted_score
+pairwise.t.test(df_consent$adjusted_score, df_consent$profession, p.adj = "bonf")
+#         non-student other
+# other   <2e-16      -     
+# student 1           <2e-16
+# p-value adjustment method: bonferroni 
+"Only Other versus student and non-student have statistically significant differences."
 
-professions <- as.factor(df_consent$profession)
-
-fm_1 <- aov(adjusted_score ~ profession, data = df_consent)
-summary(fm_1)
-# Df Sum Sq Mean Sq F value Pr(>F)    
-# profession     2   1353   676.6     577 <2e-16 ***
-#   Residuals   3693   4330     1.2                   
-# ---
-#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-TukeyHSD(fm_1, "Aggregate", ordered = TRUE)
-plot(TukeyHSD(fm_1, "Aggregate"))
+##FAST
+pairwise.t.test(df_consent_fast$adjusted_score, df_consent_fast$profession, p.adj = "bonf")
 
 
-
+#--------------------------------------------------------------
 
 values <- c(students,non_students,others)
 g <- factor(rep(1:3, c(length(students), length(non_students),length(others))),
