@@ -517,16 +517,41 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
   xlab("Test Duration (minutes)") +
   ggtitle("Slow: Test Duration X Test Score by Student Status")
 
-#---------------------------
+#-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+# COMPARING GROUPS - STATISTICAL TEST
+"Here I use Tukey Honest Distance to make multiple comparisons 
+to confirm differences between means of the groups and
+show how far each group is from each other.
+"
+
+##Groups Aggregated
 students <- df_consent[df_consent$is_student=="1",]$adjusted_score
 non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
 others <- df_consent[is.na(df_consent$is_student),]$adjusted_score
+
+professions <- as.factor(df_consent$profession)
+
+fm_1 <- aov(adjusted_score ~ profession, data = df_consent)
+summary(fm_1)
+# Df Sum Sq Mean Sq F value Pr(>F)    
+# profession     2   1353   676.6     577 <2e-16 ***
+#   Residuals   3693   4330     1.2                   
+# ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+TukeyHSD(fm_1, "Aggregate", ordered = TRUE)
+plot(TukeyHSD(fm_1, "Aggregate"))
+
+
+
+
 values <- c(students,non_students,others)
 g <- factor(rep(1:3, c(length(students), length(non_students),length(others))),
             labels = c("students",
                        "non_students",
                        "others"))
-kruskal.test(values, g)
+model <- kruskal.test(values, g)
 # data:  values and g
 # Kruskal-Wallis chi-squared = 840.89, df = 2, p-value < 2.2e-16
 
@@ -557,6 +582,9 @@ students <- df_consent[df_consent$is_student=="1",]$adjusted_score
 non_students <- df_consent[df_consent$is_student=="0",]$adjusted_score
 other <- df_consent
 t.test(students,non_students)
+
+#---------------------------------------
+
 
 
 
