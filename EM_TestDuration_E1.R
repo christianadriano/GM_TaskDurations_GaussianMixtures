@@ -326,6 +326,7 @@ whereas student and non-student only considered age and years_experience
 source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E1.R")
 df_consent <- load_consent_create_indexes(load_is_student=1)
 df_consent <- distinct(df_consent)
+
 df_consent$is_student <- as.factor(df_consent$is_student)
 df_consent$is_fast <- FALSE
 df_consent$testDuration_fastMembership <- NA;
@@ -441,17 +442,26 @@ write.csv(df_consent,paste0(path,"E1_consent_with_testDuration_fastMembership.cs
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 
+#---------------
+#ALL
 model_2_fast <- lm(formula = adjusted_score ~ test_duration , data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration , data=df_consent_slow )
 summary(model_2_fast)
 summary(model_2_slow)
 
 #(filter,fast,slow)
-#(all-aggregated, 0.012712, 0.21489) 
+#(all-aggregated, -0.20434,0.049934) 
 "
-Fast people the longer they spend, higher score
-Slow people, the longer they spend, lower their score.
+Fast people the longer they spend, lower their score (clueless)
+Slow people, the longer they spend, higher their score.
 " 
+
+cor.test(df_consent_fast$adjusted_score,df_consent_fast$test_duration, method = c("kendall"))
+#z = -1.7647, p-value = 0.07762, tau=-0.03261145
+cor.test(df_consent_slow$adjusted_score,df_consent_slow$test_duration, method = c("kendall"))
+#z = 8.1206, p-value = 4.64e-16, tau=0.1253011
+
+"Correlation agrees, but both values are small (below 0.15)"
 
 #------------
 #NON-STUDENTS
@@ -465,6 +475,18 @@ summary(model_2_slow)
 "
 Fast non-students, very weak correlation
 Slow non-students, the more they spent the worse they got (Clueless)
+"
+data=df_consent_fast[df_consent_fast$is_student==0,]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = -1.5329, p-value = 0.1253, tau=-0.08938364 
+data=df_consent_slow[df_consent_slow$is_student==0,]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = 5.4603, p-value = 4.753e-08, tau=0.248742
+
+"
+Correlation does not agree with liner model. 
+Fast non-students, the longer they spend, worse their score, but weak correlation (<0.15) (Clueless)
+Slow non-students, the longer they spend, better their score, medium correlation $\in [0.15,0.35]$ (THOROUGH)
 "
 
 #--------
@@ -482,10 +504,52 @@ Students have a different behavior.
 Fast students the longer they spend, much higher score
 Slow students, the longer they spend, a bit higher their score. (not much gain for slow students)
 " 
+
+data=df_consent_fast[df_consent_fast$is_student==1,]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = 0.48454, p-value = 0.628, tau=0.1192864 
+data=df_consent_slow[df_consent_slow$is_student==1,]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = 4.17, p-value = 3.046e-05, tau=0.3747624
+
+"
+Correlation agrees in direction with liner model. 
+Slow students, the longer they spend, better their score, strong correlation (>0.35) (THOROUGH)
+"
+
+#--------
+#OTHER 
+
+model_2_fast <- lm(formula = adjusted_score ~ test_duration, data=df_consent_fast[is.na(df_consent_fast$is_student),] )
+model_2_slow <- lm(formula = adjusted_score ~ test_duration, data=df_consent_slow[is.na(df_consent_slow$is_student),] )
+summary(model_2_fast)
+summary(model_2_slow)
+#(filter,fast,slow)
+#(other, -0.06913,0.037414) 
+
+"
+Fast others, the longer they spend, lower their score (clueless)
+Slow others, the longer they spend, a bit higher their score.
+" 
+
+data=df_consent_fast[is.na(df_consent_fast$is_student),]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = -0.13016, p-value = 0.8964, tau=-0.002585348 
+data=df_consent_slow[is.na(df_consent_slow$is_student),]
+cor.test(data$adjusted_score,data$test_duration, method = c("kendall"))
+#z = 6.294, p-value = 3.094e-10, tau=0.1070833
+
+"
+Correlation agrees in direction with liner model, 
+but correlations are both weak (<0.15) 
+"
+
+
+
 "In conclusion, group membership within duration is a confounder for certain professions, 
 but not others.
 " 
-#---------------
+#-----------------------------------------------------------------
 #PLOTS to show this phenomenon
 
 #---
