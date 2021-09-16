@@ -612,10 +612,7 @@ ggplot(df_consent_slow, aes(x=test_duration, y=adjusted_score)) +
 #-----------------------------------------------------------------------
 #-----------------------------------------------------------------------
 # COMPARING GROUPS - STATISTICAL TEST
-"Here I use Tukey Honest Distance to make multiple comparisons 
-to confirm differences between means of the groups and
-show how far each group is from each other.
-"
+"Here I use pair-wise bonferroni test to correct for multiple comparisons "
 
 ##Groups Aggregated
 pairwise.t.test(df_consent$adjusted_score, df_consent$profession, p.adj = "bonf")
@@ -635,11 +632,11 @@ pairwise.t.test(df_consent_fast$adjusted_score, df_consent_fast$profession, p.ad
 pairwise.t.test(df_consent_slow$adjusted_score, df_consent_slow$profession, p.adj = "bonf")
 #         non-student other
 # other   < 2e-16     -      
-# student 0.88        1.2e-07
+# student 0.45        1.2e-07
 # p-value adjustment method: bonferroni 
 
-"Only Other versus student and non-student have statistically significant differences."
-
+"Only non-significant differneces are the fast students x non-students,
+all other were significant"
 
 #------------------------------------------------------------
 #TRIMMING TO MATCH SUPPORT OF DISTRIBUTIONS OF TEST DURATION
