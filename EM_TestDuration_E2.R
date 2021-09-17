@@ -639,7 +639,7 @@ df_corr
 15                 Other  SLOW  0.05711839 5.497057e-01 
 16            Programmer   ALL  0.03464737 7.347806e-01
 17            Programmer  FAST  0.18137083 2.194741e-01
-18            Programmer  SLOW -0.28296487 6.489748e-02 <<<<< SLOW ==Clueless 
+18            Programmer  SLOW -0.28296487 6.489748e-02 <<<<<< SLOW==Clueless 
 
 
 \paragraph{Analsysi} - For Hobbyists and Professionals, SLOW groups have stronger correlation with score, 
