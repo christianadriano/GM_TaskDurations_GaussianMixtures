@@ -761,9 +761,6 @@ Which corresponds to a relative change in slopes of 20%, i.e., (2-1.67)/1.67 = 0
 #CORRELATIONS
 #Evaluate how fast and slow can explain adjusted_score score
 
-#-----------------------------
-# Checking only the slow group
-
 df_consent <- df_consent[!is.na(df_consent$adjusted_score),]
 df_consent_fast <- df_consent[df_consent$is_fast,]
 df_consent_slow <- df_consent[!df_consent$is_fast,]
