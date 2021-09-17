@@ -69,18 +69,21 @@ plot
 #INVESTIGATE OUTCOMES
 cor.test(df_consent$adjusted_score,df_consent$test_duration,
          alternative = "two.sided", 
-         method="pearson")
-#Positive correlation =0.2346014   
+         method="kendall")
+# z = 10.631, p-value < 2.2e-16, tau=0.1732342 
+
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_slowMembership,
          alternative = "two.sided", 
-         method="pearson")
-#Positive correlation = 0.2334522 
+         method="kendall")
+#z = -9.0789, p-value < 2.2e-16, tau=-0.1479471 
 
 cor.test(df_consent$adjusted_score,df_consent$testDuration_fastMembership,
          alternative = "two.sided", 
-         method="pearson")
-#Negative correlation = 0.2514127  
+         method="kendall")
+#z = 9.08, p-value < 2.2e-16, tau= 0.1479668  
+
+"Membership show not significant correlation (|tau|<0.15) with adjusted score"
 
 #-----------------------------------------------------
 #REGRESSION MODELS WITH ADJUSTED SCORE
@@ -157,11 +160,8 @@ Adjusted_Score has 60% weaker coefficients than qualification_score for E2
 #--------------------------------------
 #Hard clustering (not using the membership probability. Instead, using a categorical value - is_fast)
 df_consent$is_fast <- FALSE
-median_fast_membership <- median(df_consent$testDuration_fastMembership);
-df_consent[df_consent$testDuration_fastMembership<=median_fast_membership,]$is_fast <- TRUE
-
-
-#View(df_consent[c("is_fast","testDuration_fastMembership")])
+df_consent[df_consent$testDuration_fastMembership>=df_consent$testDuration_slowMembership,]$is_fast <- TRUE
+df_consent[df_consent$testDuration_fastMembership<df_consent$testDuration_slowMembership,]$is_fast <- FALSE
 
 df_consent_slow <- df_consent[!df_consent$is_fast,]
 df_consent_fast <- df_consent[df_consent$is_fast,]
@@ -171,8 +171,8 @@ model_2_slow <- lm(formula = adjusted_score ~ test_duration,  data=df_consent_sl
 summary(model_2_fast)
 summary(model_2_slow)
 #(fast/slow, test_duration)
-#(fast, 0.26294) <<<<<<<<<<< FAST has a strong positive correlation with score
-#(slow, 0.07491) 
+#(fast, 0.10329) <<<<<<<<<<< FAST has a strong positive correlation with score
+#(slow, -0.09863) 
 
 model_2_fast <- lm(formula = adjusted_score ~ test_duration + testDuration_fastMembership, data=df_consent_fast )
 model_2_slow <- lm(formula = adjusted_score ~ test_duration + testDuration_slowMembership, data=df_consent_slow )
@@ -200,23 +200,27 @@ The data is more balanced for all,except Professionals, who none fit in two Gaus
 # MOST Subjects fall in the Fast Cluster
 # profession              is_fast    count   %
 # <fct>                    <lgl>     <int>  <int>
-# 1 Professional           TRUE       184   44%
-# 2 Professional           FALSE      233   56%
+# 1 Professional           FALSE       65   16%
+# 2 Professional            TRUE      352   84%
 #                                     417
-# 3 Programmer             TRUE        14   29% <<<<<<<<<
-# 4 Programmer             FALSE       35   71%
+# 3 Programmer             FALSE        1    2% 
+# 4 Programmer              TRUE       48   98%
 #                                      49  
-# 5 Hobbyist               TRUE       216   45%
-# 6 Hobbyist               FALSE      268   55$
+# 5 Hobbyist               FALSE       64   13%
+# 6 Hobbyist                TRUE      420   87%
 #                                     484
-# 7 Graduate_Student       TRUE       181   64%
-# 8 Graduate_Student       FALSE      102   36% <<<<<<<<<
+# 7 Graduate_Student       FALSE       59   21%
+# 8 Graduate_Student        TRUE      224   79% 
 #                                     283
-# 9 Undergraduate_Student  TRUE       268   60%
-# 10 Undergraduate_Student FALS       175   40%
+# 9 Undergraduate_Student  FALSE       79   18%
+# 10 Undergraduate_Student  TRUE      364   82%
 #                                     443
-# 11 Other                 TRUE        46   41%
-# 12 Other                 FALSE       66   59%
+# 11 Other                 TRUE        11   10%
+# 12 Other                 FALSE      101   90%
+#                                     112
+
+"Data is very unbalanced. The reason is that membership should be computed
+by profession not overall."
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -658,4 +662,32 @@ being able to ask for help. Meanwhile, the groups who show thoroughness when
 being slow responders, could be incentivized to give a second look at their
 answers if they are responding too fast.
 "
+#-----------------------------------------------------------------------
+#-----------------------------------------------------------------------
+# COMPARING GROUPS - STATISTICAL TEST
+"Here I use pair-wise bonferroni test to correct for multiple comparisons "
+
+##Groups Aggregated
+pairwise.t.test(df_consent$adjusted_score, df_consent$profession, p.adj = "bonf")
+#         non-student other
+# other   <2e-16      -     
+# student 1           <2e-16
+# p-value adjustment method: bonferroni 
+
+##FAST
+pairwise.t.test(df_consent_fast$adjusted_score, df_consent_fast$profession, p.adj = "bonf")
+#         non-student other
+# other   <2e-16      -     
+# student 1           <2e-16
+# p-value adjustment method: bonferroni 
+
+##SLOW
+pairwise.t.test(df_consent_slow$adjusted_score, df_consent_slow$profession, p.adj = "bonf")
+#         non-student other
+# other   < 2e-16     -      
+# student 0.45        1.2e-07
+# p-value adjustment method: bonferroni 
+
+"Only non-significant differneces are the fast students x non-students,
+all other were significant"
 
