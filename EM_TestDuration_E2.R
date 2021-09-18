@@ -669,25 +669,30 @@ answers if they are responding too fast.
 
 ##Groups Aggregated
 pairwise.t.test(df_consent$adjusted_score, df_consent$profession, p.adj = "bonf")
-#         non-student other
-# other   <2e-16      -     
-# student 1           <2e-16
-# p-value adjustment method: bonferroni 
-
+"
+                      Professional Programmer Hobbyist Graduate_Student Undergraduate_Student
+  Programmer            1.000        -          -        -                -                    
+  Hobbyist              2.1e-11      0.696      -        -                -                    
+  Graduate_Student      1.2e-12      0.141      1.000    -                -                    
+  Undergraduate_Student 4.0e-12      0.467      1.000    1.000            -                    
+  Other                 3.2e-10      0.025      0.328    1.000            0.638  
+ p-value adjustment method: bonferroni 
+"
 ##FAST
 pairwise.t.test(df_consent_fast$adjusted_score, df_consent_fast$profession, p.adj = "bonf")
-#         non-student other
-# other   <2e-16      -     
-# student 1           <2e-16
-# p-value adjustment method: bonferroni 
+"
+                      Professional Programmer Hobbyist Graduate_Student Undergraduate_Student
+Programmer            1.000        -          -        -                -                    
+Hobbyist              4.7e-10      0.784      -        -                -                    
+Graduate_Student      2.0e-07      0.878      1.000    -                -                    
+Undergraduate_Student 1.5e-07      1.000      1.000    1.000            -                    
+Other                 2.8e-09      0.034      0.451    0.745            0.138       
+p-value adjustment method: bonferroni 
+"
 
 ##SLOW
 pairwise.t.test(df_consent_slow$adjusted_score, df_consent_slow$profession, p.adj = "bonf")
-#         non-student other
-# other   < 2e-16     -      
-# student 0.45        1.2e-07
-# p-value adjustment method: bonferroni 
-
-"Only non-significant differneces are the fast students x non-students,
-all other were significant"
+"
+Could not compute.
+"
 
