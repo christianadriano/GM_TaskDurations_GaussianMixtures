@@ -331,12 +331,6 @@ df_consent$is_student <- as.factor(df_consent$is_student)
 df_consent$is_fast <- FALSE
 df_consent$testDuration_fastMembership <- NA;
 
-df_consent[df_consent$is_student=="0" & !is.na(df_consent$is_student),"profession"] <- "non-student"
-df_consent[df_consent$is_student=="1" & !is.na(df_consent$is_student),"profession"] <- "student"
-df_consent[is.na(df_consent$is_student),]$profession <- "other"
-df_consent$profession <- factor(df_consent$profession)
-
-
 #------------
 #STUDENTS 
 choice <- "student";
