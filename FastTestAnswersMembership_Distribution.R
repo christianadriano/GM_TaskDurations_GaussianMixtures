@@ -36,18 +36,11 @@ cutpoint. Our suggestion is to either use the median as
 cutpoint between fast and slow responders or stratify these
 groups by the quartiles."
 
-"Note that all the professions have similar median (Professional=0.6391,
-Hobbyist=0.6396, Graduate_Students=0.6376, Undergraduate_Student= 0.6322),
-except for Programmer (0.6080) and Other (0.6125)"
-
-summary(df_selected[df_selected$profession=="Other",]$testDuration_fastMembership)
-
-"Compare skewness of membership distributions"
-
 professions <- unique(df_selected$profession)
 
 df_results <- data.frame(matrix("NA",6,7))
-colnames(df_results) <- c("profession","1stQrt","median","mean","3rd_Quartile","skewness","kurtosis")
+colnames(df_results) <- c("profession","1stQrt","median","mean","3rd_Quartile",
+                          "skewness","kurtosis")
 
 row_index=0;
 for(prof in professions ){
@@ -74,14 +67,45 @@ df_results
 5                 Other  0.552  0.612 0.591         0.64   -1.111    3.558
 6            Programmer  0.497  0.608 0.567         0.63   -0.764    2.434
 "
+
 "
+COMPARING MEDIANS
+Note that all of the professions have similar median (Professional=0.6391,
+Hobbyist=0.6396, Graduate_Students=0.6376, Undergraduate_Student= 0.6322),
+except for Programmer (0.6080) and Other (0.6125)"
+
+"
+COMPARING SKEWNESS
 Programmer has the larger skewness followed by Hobbyist and undergraduate,
 whereas Other, professional and graduate have similar values. This might
 be an indication that the first three groups are less homogeneous than the
 the second group w.r.t. membership distribution. In practical terms,
 this means that it is easier to justify for the more homogenous group a
-split in two categories (fast, slow), while for the more heterogeneous professions, 
-such split might mix people with very distinct w.r.t. to strength of their 
-membership to answer speed.
-that these 
+split in two categories (fast, slow), while for the more heterogeneous 
+professions, such split might mix people with very distinct w.r.t. 
+to strength of their membership to answer speed.
+"
+
+"
+In the face of this information, how should we stratify each profession
+w.r.t. to categories of fast and slow responders? 
+
+The first option is to not stratify, but instead take the membership as 
+a continuous variable that could be used in the regression formula. However,
+as we know that some professions have a more heterogeneous 
+distribution (larger skewness) than others, doing so would imply fitting 
+a line for a data pattern that is potentially non-linear. 
+
+The non-linear model would be better fit with 
+a spline, but that would require making assumptions about the anchor points,
+for which we do not have any theoretical (data-independent) information. 
+This lack of prior-knowledge poses two threats: 
+(1) difficulty to validate the fit and (2) high risk of overfitting.
+The difficulty to validate is higher for the heterogeneous professions, 
+because stronger assumptions about number and position of the anchor points.
+Conversely, the risk of overfitting is higher for the homogeneous professions, 
+because a linear model would be a more parsimonious approach. 
+
+Future work could rely on the current results as prior-knowledge that could be 
+used to compare with various fit models.
 "
