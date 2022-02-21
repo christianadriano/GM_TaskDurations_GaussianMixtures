@@ -108,4 +108,12 @@ because a linear model would be a more parsimonious approach.
 
 Future work could rely on the current results as prior-knowledge that could be 
 used to compare with various fit models.
+
+Second option is to stratify, but how many strata? The simple is two strata
+cut by the median, which might work well for homogenous professions, 
+because the resulting splits that have similar variances. Conversely,
+if a two split is done for the more skewed distributions, the splits wuld
+have more distinct variances. We could test that with a heteroskedacity test.
+Therefore, a more reasonable option is to split according with
+the quartiles (i.e., four splits), which do not require any prior-knowledge.
 "
