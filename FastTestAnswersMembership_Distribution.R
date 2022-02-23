@@ -7,19 +7,26 @@ groups could be split by median or quartile the membership distribution.
 library(ggplot2)
 library(moments)
 
-"Load only Consent data. No data from tasks, only from demographics and qualification test"
-source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
-df_consent <- load_consent_create_indexes()
-df_consent <- rename(df_consent,progr_years=years_programming)
-df_consent <- rename(df_consent,test_score=adjusted_score)
-df_consent <- rename(df_consent,partic_age=age)
+prepareData <- function(){
+  #Load only Consent data. No data from tasks, only from demographics and qualification test
+  source("C://Users//Christian//Documents//GitHub//CausalModel_FaultUnderstanding//data_loaders//load_consent_create_indexes_E2.R")
+  df_consent <- load_consent_create_indexes()
+  df_consent <- rename(df_consent,progr_years=years_programming)
+  df_consent <- rename(df_consent,test_score=adjusted_score)
+  df_consent <- rename(df_consent,age_years=age)
+  df_consent <- rename(df_consent,fast_classif=testDuration_fastMembership)
+  return(df_consent)
+}
+
+df_consent <- prepareData()
+
 
 df_selected <-
   dplyr::select(df_consent,
                 profession,
-                testDuration_fastMembership,
+                fast_classif,
                 progr_years,
-                partic_age,
+                age_years,
                 test_duration,
                 test_score #outcome variable
   );
@@ -117,3 +124,55 @@ have more distinct variances. We could test that with a heteroskedacity test.
 Therefore, a more reasonable option is to split according with
 the quartiles (i.e., four splits), which do not require any prior-knowledge.
 "
+
+#-------------------------------------------------------
+#Distributions of testDuration above versus below median
+
+df_consent <- prepareData()
+
+
+df_selected <- 
+  dplyr::select(df_consent ,
+                profession,
+                testDuration_fastMembership,
+                test_duration
+                )
+
+
+i=1
+choice = professions[i]
+df_prof <- df_selected[df_selected$profession==choice,]
+median_membership_prof <- median(df_prof$testDuration_fastMembership);
+df_prof_fast <- df_prof[df_prof$testDuration_fastMembership>=median_membership_prof,]
+df_prof_slow <- df_prof[df_prof$testDuration_fastMembership<median_membership_prof,]
+
+boxplot(df_prof_fast$test_duration,main=paste(choice,"Fast","Test Duration"))
+boxplot(df_prof_slow$test_duration,main=paste(choice,"Slow","Test Duration"))
+     
+summary(df_prof_fast$test_duration)
+summary(df_prof_slow$test_duration)
+
+hist(df_prof$test_duration,bin=1)
+
+ggplot(df_prof, aes(test_duration)) +geom_histogram(binwidth = 1)
+
+df_fast <-  df_prof[df_prof[df_prof$profession=="Other"&df_prof$testDuration_fastMembership>=median_membership_prof,]
+df_slow <-  df_prof[df_prof[df_prof$profession=="Other","testDuration_fastMembership"]<median_membership_prof,]
+
+
+for (i in 1:length(professions)) {
+  choice = professions[i]
+  median_membership_prof <- median(df_prof[df_prof$profession==choice, ]$testDuration_fastMembership);
+  #filter-out all slow for a given profession  
+  df_fast$professiondf_prof <- df_prof[df_prof$profession==choice, ]$testDuration_fastMembership<median_membership_prof),]
+  
+  
+}
+
+
+
+  df_fast <- df_fast
+
+ggplot(df_selected, aes(testDuration_fastMembership, profession)) +  # Boxplot with updated labels
+  geom_boxplot()
+
