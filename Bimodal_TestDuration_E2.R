@@ -1,14 +1,10 @@
 "
-Is Test Duration Bimodal in experiment E2?
+Is Test_Duration Bimodal in experiment E2?
 
-It is bimodal across all qualification score level, more strongly for Score=100%
-Plots bimodality in histogram and density. Explain. Need to zoom in (remove outliers upper_wiskers)
+Yes, but if varies according to Score, for instance, it is stronger for Score=100%.
+However, this was a visual test. 
 
-Discuss bimodality in E2 as well for different scores
-Concerns:
-While treating test, cannot treat the duration of passed and not passed the same.
-This affects how I should determine outliers.
-
+The script below plots bimodality in histogram and density. 
 "
 
 
