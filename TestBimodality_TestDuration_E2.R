@@ -1,5 +1,9 @@
 "
 Test Bimodality and compute their strength.
+
+Rejecting the null-hypothesis indicates some evidence that the 
+distribution is at least bi-modal.
+
 "
 
 library(diptest)
