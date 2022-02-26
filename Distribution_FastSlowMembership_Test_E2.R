@@ -36,11 +36,21 @@ df_selected <-
 
 ggplot(df_selected, aes(testDuration_fastMembership, profession)) +  # Boxplot with updated labels
   geom_boxplot()
-"Looking at the boxplot, the distributions are left skewed
+
+
+"
+Comparing distributions, the first obsrevations it that 
+the 1st quartile of for all professions close (Programmmer 0.497) 
+or above 50%. This implies that almost all data points have membership
+value 50% of above. Hence, a cutoff of 50% is not practical choice, as
+it would create a single category. The other choices are to look at
+the mean and median of the distribution as possible cutoff points. 
+
+A second look at the boxplots also show that they are left skewed
 by more extreme values (longer tail) towards the left of the
-median. This makes the mean a very non representative
-cutpoint. Our suggestion is to either use the median as
-cutpoint between fast and slow responders or stratify these
+median. This makes the mean a very unrepresentative
+cutoff point. Our suggestion is to either use the median as
+cutoff point between fast and slow responders or stratify these
 groups by the quartiles."
 
 professions <- unique(df_selected$profession)
@@ -76,6 +86,8 @@ df_results
 "
 
 "
+Comparing 
+
 COMPARING MEDIANS
 Note that all of the professions have similar median (Professional=0.6391,
 Hobbyist=0.6396, Graduate_Students=0.6376, Undergraduate_Student= 0.6322),
