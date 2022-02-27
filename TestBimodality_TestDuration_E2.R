@@ -65,3 +65,18 @@ for(score in scores){
 "Only score==0 rejected the null-hypothesis, which signifies that
 the has to accept that alternative hypothesis that distribution is 
 non-unimodal."
+
+#-------------------------------
+# Bimodality coefficient B = (skewness^2 + 1)/kurtosis
+
+#------------------------------
+# Bimodality amplitude A_B = (A1 - A_antimode)/ A1
+#, where A1 is the amplitude of the smaller peak and the A_antimode is
+# the amplitude of the deepest point between the two peaks
+# A_B is always smaller than 1, hence larger values of A_B
+#indicate more distinct peaks
+
+#------------------------------
+# Bimodal ratio R = Amplituted Righ Peak / Amplituted Righ Peak
+# 
+# Source: https://en.wikipedia.org/wiki/Multimodal_distribution#Bimodality_amplitude
