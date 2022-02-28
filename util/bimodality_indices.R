@@ -26,7 +26,7 @@ compute_Bimodality_Amplitude <-  function(data_vector){
   A_antimode <- modes$fvalue[2]
   
   Bimodal_Amplitude <- (A_1 - A_antimode) /A_1
-  return (Bimodal_Amplitude)
+  return (round(Bimodal_Amplitude,3))
 }
 
 #-------------------------------
@@ -36,14 +36,14 @@ compute_Bimodality_Coefficient <- function(data_vector){
   kt <- kurtosis(data_vector)
   
   Bimodality_Coefficient <- (sk^2 + 1)/kt
-  return(Bimodality_Coefficient)
+  return(round(Bimodality_Coefficient,3))
 }
 
 #------------------------------
 # Bimodal ratio R = Amplituted Right Peak / Amplituted left Peak
 compute_Bimodality_Ratio <- function(data_vector){
   Bimodality_Ratio = modes$locations[1] / modes$locations[3]
-  return(Bimodality_Ratio)  
+  return(round(Bimodality_Ratio,3)) 
 }
 
 #------------------------------------------
