@@ -1,9 +1,14 @@
 "
 Utility scripts to compute Biomdal indices for comparing how
 strong is the bimodality across strata.
+
+Sources: 
+ https://en.wikipedia.org/wiki/Multimodal_distribution#Bimodality_amplitude
+ https://r-coder.com/mode-r/
 "
 
 library(multimode)
+library(moments)
 
 #-------------------------------------------------------------------
 " Bimodality amplitude A_B = (A1 - A_antimode)/ A1
@@ -11,10 +16,8 @@ library(multimode)
  the amplitude of the deepest point between the two peaks
  A_B is always smaller than 1, hence larger values of A_B
 indicate more distinct peaks"
-compute_Bimodal_Amplitude <-  function(data_vector,plot_title){
+compute_Bimodality_Amplitude <-  function(data_vector){
   modes <- locmodes(data_vector,mod0 = 2)
-  plot(modes)
-  title(main = plot_title)
   if(modes$locations[1]<modes$locations[3]){
     A_1 <- modes$fvalue[1]
   }else{
@@ -24,4 +27,30 @@ compute_Bimodal_Amplitude <-  function(data_vector,plot_title){
   
   Bimodal_Amplitude <- (A_1 - A_antimode) /A_1
   return (Bimodal_Amplitude)
+}
+
+#-------------------------------
+# Bimodality coefficient B = (skewness^2 + 1)/kurtosis
+compute_Bimodality_Coefficient <- function(data_vector){
+  sk <- skewness(data_vector)
+  kt <- kurtosis(data_vector)
+  
+  Bimodality_Coefficient <- (sk^2 + 1)/kt
+  return(Bimodality_Coefficient)
+}
+
+#------------------------------
+# Bimodal ratio R = Amplituted Right Peak / Amplituted left Peak
+compute_Bimodality_Ratio <- function(data_vector){
+  Bimodality_Ratio = modes$locations[1] / modes$locations[3]
+  return(Bimodality_Ratio)  
+}
+
+#------------------------------------------
+# Plotting the distribution with the modes
+
+plot_modes <- function(data_vector,plot_title){
+  modes <- locmodes(data_vector,mod0 = 2)
+  plot(modes)
+  title(main = plot_title)
 }
