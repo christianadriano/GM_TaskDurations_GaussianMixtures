@@ -42,7 +42,8 @@ compute_Bimodality_Coefficient <- function(data_vector){
 #------------------------------
 # Bimodal ratio R = Amplituted Right Peak / Amplituted left Peak
 compute_Bimodality_Ratio <- function(data_vector){
-  Bimodality_Ratio = modes$locations[1] / modes$locations[3]
+  modes <- locmodes(data_vector,mod0 = 2)
+  Bimodality_Ratio = modes$fvalue[1] / modes$fvalue[3]
   return(round(Bimodality_Ratio,3)) 
 }
 
