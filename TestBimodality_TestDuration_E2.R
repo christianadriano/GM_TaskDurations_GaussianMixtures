@@ -72,10 +72,10 @@ non-unimodal."
 #---------------------------------------------------
 
 df_results <- data.frame(matrix("NA",7,36))
-colnames(df_results) <- c("profession","score","size","avg progr. years",
-                          "bimodal. coefficient",
-                          "bimodal. amplitude",
-                          "bimodal, ratio")
+colnames(df_results) <- c("prof","score","size","yoe",
+                          "coefficient",
+                          "amplitude",
+                          "ratio")
 
 row_index=0;
 for(prof in professions ){
@@ -97,7 +97,6 @@ for(prof in professions ){
     row_index=row_index+1;
     df_results[row_index,1] <- prof
     df_results[row_index,2] <- score_value
-    df_results[row_index,2] <- "all" #score
     data_dist <- df_score$test_duration 
     df_results[row_index,3] <- length(data_dist) #data points
     if(length(data_dist)>0){
