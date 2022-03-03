@@ -1,5 +1,5 @@
 "
-Compute the strength of bimodality across profession and scores.
+E2 - Compute the strength of bimodality across profession and scores.
 
 Plots
 Compute correlations
