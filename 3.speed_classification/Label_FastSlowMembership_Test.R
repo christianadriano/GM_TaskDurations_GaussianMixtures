@@ -17,6 +17,7 @@ compute_median_label <- function(df){
   profession_list <- unique(df$profession)
   for(prof in profession_list){
     median_fast_prof <- median(df[df$profession==prof, ]$testDuration_fastMembership);
-    df[df$profession==prof & df$fast_classif>=median_fast_prof,]$is_fast <- TRUE
+    df[df$profession==prof & df$testDuration_fastMembership>=median_fast_prof,]$is_fast <- TRUE
   }
+  return(df)
 }
