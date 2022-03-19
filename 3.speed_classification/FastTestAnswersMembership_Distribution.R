@@ -134,7 +134,7 @@ df_consent <- prepareData()
 df_selected <- 
   dplyr::select(df_consent ,
                 profession,
-                testDuration_fastMembership,
+                fast_classif,
                 test_duration
                 )
 
@@ -142,9 +142,9 @@ df_selected <-
 i=1
 choice = professions[i]
 df_prof <- df_selected[df_selected$profession==choice,]
-median_membership_prof <- median(df_prof$testDuration_fastMembership);
-df_prof_fast <- df_prof[df_prof$testDuration_fastMembership>=median_membership_prof,]
-df_prof_slow <- df_prof[df_prof$testDuration_fastMembership<median_membership_prof,]
+median_membership_prof <- median(df_prof$fast_classif);
+df_prof_fast <- df_prof[df_prof$fast_classif>=median_membership_prof,]
+df_prof_slow <- df_prof[df_prof$fast_classif<median_membership_prof,]
 
 boxplot(df_prof_fast$test_duration,main=paste(choice,"Fast","Test Duration"))
 boxplot(df_prof_slow$test_duration,main=paste(choice,"Slow","Test Duration"))
