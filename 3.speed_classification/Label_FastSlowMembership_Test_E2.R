@@ -12,12 +12,11 @@ check script Distribution_FastSlowMembership_Test_E2.R)
 "
 
 
-compute_median_label <- function(df,profession){
-  professions <- unique(df$profession)
-  for(prof in professions){
-    median_membership_prof <- median(df_prof[df_prof$profession==prof, ]$testDuration_fastMembership);
-    #filter-out all slow for a given profession  
-    df$is_fast <- df[df$profession==prof & testDuration_fastMembership<median_membership_prof,]$is_fast
-
+compute_median_label <- function(df){
+  df$is_fast <- FALSE
+  profession_list <- unique(df$profession)
+  for(prof in profession_list){
+    median_fast_prof <- median(df[df$profession==prof, ]$testDuration_fastMembership);
+    df[df$profession==prof & df$fast_classif>=median_fast_prof,]$is_fast <- TRUE
   }
 }
