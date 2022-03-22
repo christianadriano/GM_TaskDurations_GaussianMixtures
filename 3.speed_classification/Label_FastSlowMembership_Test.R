@@ -26,8 +26,17 @@ compute_mean_label <- function(df){
   df$is_fast <- FALSE
   profession_list <- unique(df$profession)
   for(prof in profession_list){
-    mean <- mean(df[df$profession==prof, ]$testDuration_fastMembership);
+    mean_fast_prof <- mean(df[df$profession==prof, ]$testDuration_fastMembership);
     df[df$profession==prof & df$testDuration_fastMembership>=mean_fast_prof,]$is_fast <- TRUE
+  }
+  return(df)
+}
+
+compute_50percent_label <- function(df){
+  df$is_fast <- FALSE
+  profession_list <- unique(df$profession)
+  for(prof in profession_list){
+    df[df$profession==prof & df$testDuration_fastMembership>=0.5,]$is_fast <- TRUE
   }
   return(df)
 }
